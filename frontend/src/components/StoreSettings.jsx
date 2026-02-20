@@ -44,7 +44,7 @@ export default function StoreSettings({ businessId, theme }) {
 
     const fetchMembers = async () => {
         try {
-            const res = await fetch(`http://localhost:5000/api/businesses/${businessId}/members`, {
+            const res = await fetch(`${API_URL}/businesses/${businessId}/members`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -58,7 +58,7 @@ export default function StoreSettings({ businessId, theme }) {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:5000/api/businesses/${businessId}`, {
+            const res = await fetch(`${API_URL}/businesses/${businessId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export default function StoreSettings({ businessId, theme }) {
     const handleAddMember = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`http://localhost:5000/api/businesses/${businessId}/members`, {
+            const res = await fetch(`${API_URL}/businesses/${businessId}/members`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export default function StoreSettings({ businessId, theme }) {
 
     const handleUpdateRole = async (userId, newRole) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/businesses/${businessId}/members/${userId}`, {
+            const res = await fetch(`${API_URL}/businesses/${businessId}/members/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ export default function StoreSettings({ businessId, theme }) {
     const handleRemoveMember = async (userId) => {
         if (!window.confirm('Are you sure you want to remove this member?')) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/businesses/${businessId}/members/${userId}`, {
+            const res = await fetch(`${API_URL}/businesses/${businessId}/members/${userId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

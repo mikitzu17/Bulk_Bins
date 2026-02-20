@@ -13,7 +13,8 @@ import CustomSelect from '../components/CustomSelect';
 import ExportModal from '../components/ExportModal';
 import Logo from '../assets/logo.png';
 
-const API_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000") + "/api";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_URL = `${BASE_URL}/api`;
 
 const BusinessHome = () => {
     const { id } = useParams();
@@ -157,7 +158,7 @@ const BusinessHome = () => {
 
     const fetchInventory = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/inventory`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/inventory`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -169,7 +170,7 @@ const BusinessHome = () => {
 
     const fetchTransactions = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/transactions?limit=100`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/transactions?limit=100`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -186,7 +187,7 @@ const BusinessHome = () => {
     const fetchMembers = async () => {
         setIsLoadingMembers(true);
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/members`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/members`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -200,7 +201,7 @@ const BusinessHome = () => {
     const handleRemoveMember = async (userId) => {
         if (!window.confirm('Are you sure you want to remove this member?')) return;
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/members/${userId}`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/members/${userId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -220,7 +221,7 @@ const BusinessHome = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/members/${editingMember.user_id}`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/members/${editingMember.user_id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -248,10 +249,10 @@ const BusinessHome = () => {
     const fetchAiData = async () => {
         try {
             const [pnlRes, predRes, insightRes, starRes] = await Promise.all([
-                fetch(`http://localhost:5000/api/businesses/${id}/ai/pnl`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`http://localhost:5000/api/businesses/${id}/ai/predictions`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`http://localhost:5000/api/businesses/${id}/ai/inventory-insights`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`http://localhost:5000/api/businesses/${id}/ai/profit-stars`, { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch(`${API_URL}/businesses/${id}/ai/pnl`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_URL}/businesses/${id}/ai/predictions`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_URL}/businesses/${id}/ai/inventory-insights`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_URL}/businesses/${id}/ai/profit-stars`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
             if (pnlRes.ok) setPnlData(await pnlRes.json());
             if (predRes.ok) setAiPredictions(await predRes.json());
@@ -278,7 +279,7 @@ const BusinessHome = () => {
         const toastId = toast.loading("Importing transactions...");
 
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/transaction-import`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/transaction-import`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -312,7 +313,7 @@ const BusinessHome = () => {
         const toastId = toast.loading('Importing transactions...');
 
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/transaction-import`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/transaction-import`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -347,7 +348,7 @@ const BusinessHome = () => {
 
         const toastId = toast.loading('Importing transactions...');
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/transaction-import`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/transaction-import`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -401,7 +402,7 @@ const BusinessHome = () => {
     const handleAddItem = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/inventory`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/inventory`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -459,7 +460,7 @@ const BusinessHome = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/transactions`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/transactions`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -494,7 +495,7 @@ const BusinessHome = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/transactions/${editingTransaction.id}`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/transactions/${editingTransaction.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -521,7 +522,7 @@ const BusinessHome = () => {
     const handleDeleteTransaction = async (transactionId) => {
         if (!window.confirm('Are you sure you want to delete this transaction?')) return;
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/transactions/${transactionId}`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/transactions/${transactionId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -537,7 +538,7 @@ const BusinessHome = () => {
 
     const handleRestock = async (item, additionalQty) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${id}/inventory/${item.id}`, {
+            const response = await fetch(`${API_URL}/businesses/${id}/inventory/${item.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -558,7 +559,7 @@ const BusinessHome = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:5000/api/businesses/${currentBusiness.id}/members`, {
+            const response = await fetch(`${API_URL}/businesses/${currentBusiness.id}/members`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1159,8 +1160,8 @@ const BusinessHome = () => {
                                         e.preventDefault();
                                         const method = isEditingItem ? 'PUT' : 'POST';
                                         const url = isEditingItem
-                                            ? `http://localhost:5000/api/businesses/${id}/inventory/${editingItem.id}`
-                                            : `http://localhost:5000/api/businesses/${id}/inventory`;
+                                            ? `${API_URL}/businesses/${id}/inventory/${editingItem.id}`
+                                            : `${API_URL}/businesses/${id}/inventory`;
 
                                         try {
                                             const response = await fetch(url, {
@@ -1405,7 +1406,7 @@ const BusinessHome = () => {
                                                                                     onClick={async () => {
                                                                                         if (!confirm('Archive this item from inventory?')) return;
                                                                                         try {
-                                                                                            const response = await fetch(`http://localhost:5000/api/businesses/${id}/inventory/${item.id}`, {
+                                                                                            const response = await fetch(`${API_URL}/businesses/${id}/inventory/${item.id}`, {
                                                                                                 method: 'DELETE',
                                                                                                 headers: { 'Authorization': `Bearer ${token}` }
                                                                                             });
@@ -1535,9 +1536,9 @@ const BusinessHome = () => {
                                                                 {new Date(txn.timestamp).toLocaleDateString()} • {txn.category}
                                                                 {txn.receipt_url && (
                                                                     <div className="flex items-center ml-4 space-x-3">
-                                                                        <a href={`http://localhost:5000${txn.receipt_url}`} target="_blank" rel="noreferrer" className="text-primary-400 hover:underline">View</a>
+                                                                        <a href={`${BASE_URL}${txn.receipt_url}`} target="_blank" rel="noreferrer" className="text-primary-400 hover:underline">View</a>
                                                                         <span className="text-slate-700">|</span>
-                                                                        <a href={`http://localhost:5000${txn.receipt_url}`} download className="text-primary-400 hover:underline">Download</a>
+                                                                        <a href={`${BASE_URL}${txn.receipt_url}`} download className="text-primary-400 hover:underline">Download</a>
                                                                     </div>
                                                                 )}
                                                             </div>
