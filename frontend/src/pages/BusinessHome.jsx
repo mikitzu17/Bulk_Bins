@@ -13,6 +13,7 @@ import CustomSelect from '../components/CustomSelect';
 import ExportModal from '../components/ExportModal';
 import Logo from '../assets/logo.png';
 
+const API_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000") + "/api";
 
 const BusinessHome = () => {
     const { id } = useParams();
@@ -378,7 +379,7 @@ const BusinessHome = () => {
         }
         setIsClassifying(true);
         try {
-            const response = await fetch('http://localhost:5000/api/ai/classify', {
+            const response = await fetch(`${API_URL}/ai/classify`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

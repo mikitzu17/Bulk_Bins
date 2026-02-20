@@ -4,6 +4,8 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import CustomSelect from './CustomSelect';
 
+const API_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000") + "/api";
+
 export default function StoreSettings({ businessId, theme }) {
     const { token, currentBusiness, setCurrentBusiness } = useAuth();
     const [activeSection, setActiveSection] = useState('General');

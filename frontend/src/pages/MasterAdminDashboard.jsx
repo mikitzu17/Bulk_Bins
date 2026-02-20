@@ -22,7 +22,7 @@ import toast from 'react-hot-toast';
 import FarmBg from '../assets/farm.jpg';
 import Logo from '../assets/logo.png';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000") + "/api";
 
 const MasterAdminDashboard = () => {
     const { token, logout, user } = useAuth();

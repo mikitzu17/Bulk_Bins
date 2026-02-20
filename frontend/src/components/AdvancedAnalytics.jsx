@@ -28,6 +28,8 @@ ChartJS.register(
     Filler
 );
 
+const API_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000") + "/api";
+
 const AdvancedAnalytics = ({ businessId, onClose, theme }) => {
     const { token } = useAuth();
     const [data, setData] = useState(null);
@@ -36,7 +38,7 @@ const AdvancedAnalytics = ({ businessId, onClose, theme }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/businesses/${businessId}/ai/advanced-analytics`, {
+                const response = await fetch(`${API_URL}/businesses/${businessId}/ai/advanced-analytics`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
