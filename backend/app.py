@@ -110,7 +110,7 @@ def login():
         access_token = create_access_token(identity=user.email)
         # Also return businesses they are members of
         memberships = BusinessMember.query.filter_by(user_id=user.id).all()
-        biz_list = [{"id": m.business_id, "name": m.business.name, "role": m.role, "currency": m.business.currency} for m in memberships]
+        biz_list = [{"id": m.business_id, "name": m.business.name, "role": m.role, "currency": m.business.currency, "status": m.business.status or 'approved'} for m in memberships]
         return jsonify({
             "token": access_token, 
             "user": {
@@ -131,7 +131,7 @@ def verify():
     if user:
         # Also return businesses they are members of
         memberships = BusinessMember.query.filter_by(user_id=user.id).all()
-        biz_list = [{"id": m.business_id, "name": m.business.name, "role": m.role, "currency": m.business.currency} for m in memberships]
+        biz_list = [{"id": m.business_id, "name": m.business.name, "role": m.role, "currency": m.business.currency, "status": m.business.status or 'approved'} for m in memberships]
         return jsonify({
             "user": {
                 "email": user.email, 
@@ -147,10 +147,14 @@ def verify():
 @master_admin_required()
 def admin_overview():
     user_count = User.query.count()
-    business_count = Business.query.count()
+    business_count = Business.query.filter(Business.status == 'approved').count()
+    pending_count = Business.query.filter(Business.status == 'pending').count()
+    rejected_count = Business.query.filter(Business.status == 'rejected').count()
     return jsonify({
         "total_users": user_count,
-        "total_businesses": business_count
+        "total_businesses": business_count,
+        "pending_businesses": pending_count,
+        "rejected_businesses": rejected_count
     }), 200
 
 @app.route('/api/admin/users', methods=['GET'])
@@ -200,7 +204,8 @@ def admin_get_businesses():
             "name": b.name,
             "owners": owner_names,
             "member_count": len(b.members),
-            "created_at": b.created_at.strftime("%Y-%m-%d")
+            "created_at": b.created_at.strftime("%Y-%m-%d"),
+            "status": b.status or 'approved'
         })
     return jsonify(result), 200
 
@@ -213,6 +218,44 @@ def admin_delete_business(business_id):
     db.session.commit()
     return jsonify({"message": "Business deleted"}), 200
 
+@app.route('/api/admin/pending-businesses', methods=['GET'])
+@master_admin_required()
+def admin_get_pending_businesses():
+    businesses = Business.query.filter_by(status='pending').all()
+    result = []
+    for b in businesses:
+        owners = BusinessMember.query.filter_by(business_id=b.id, role='Owner').all()
+        owner_names = [o.user.username for o in owners]
+        owner_emails = [o.user.email for o in owners]
+        result.append({
+            "id": b.id,
+            "name": b.name,
+            "owners": owner_names,
+            "owner_emails": owner_emails,
+            "member_count": len(b.members),
+            "created_at": b.created_at.strftime("%Y-%m-%d"),
+            "status": b.status
+        })
+    return jsonify(result), 200
+
+@app.route('/api/admin/businesses/<int:business_id>/approve', methods=['PUT'])
+@master_admin_required()
+def admin_approve_business(business_id):
+    biz = Business.query.get(business_id)
+    if not biz: return jsonify({"message": "Business not found"}), 404
+    biz.status = 'approved'
+    db.session.commit()
+    return jsonify({"message": f"Business '{biz.name}' has been approved"}), 200
+
+@app.route('/api/admin/businesses/<int:business_id>/reject', methods=['PUT'])
+@master_admin_required()
+def admin_reject_business(business_id):
+    biz = Business.query.get(business_id)
+    if not biz: return jsonify({"message": "Business not found"}), 404
+    biz.status = 'rejected'
+    db.session.commit()
+    return jsonify({"message": f"Business '{biz.name}' has been rejected"}), 200
+
 # Business Management
 @app.route('/api/businesses', methods=['POST'])
 @jwt_required()
@@ -221,7 +264,7 @@ def create_business():
     current_user_email = get_jwt_identity()
     user = User.query.filter_by(email=current_user_email).first()
     
-    new_biz = Business(name=data.get('name'))
+    new_biz = Business(name=data.get('name'), status='pending')
     db.session.add(new_biz)
     db.session.flush() # Get ID before commit
     
@@ -229,7 +272,7 @@ def create_business():
     db.session.add(membership)
     db.session.commit()
     
-    return jsonify({"id": new_biz.id, "name": new_biz.name, "role": "Owner"}), 201
+    return jsonify({"id": new_biz.id, "name": new_biz.name, "role": "Owner", "status": "pending"}), 201
 
 @app.route('/api/businesses/<int:business_id>/members', methods=['POST'])
 @role_required(['Owner'])
@@ -814,10 +857,14 @@ def import_transactions(business_id):
     
     if file and file.filename.endswith('.csv'):
         try:
+            original_filename = file.filename
             # Save file for AI Forecaster usage (Persist it)
             # Use a fixed name 'sales_data.csv' so get_csv_analysis can find it
             filepath = os.path.join(basedir, f'sales_data_{business_id}.csv') 
             file.save(filepath)
+            # Save original filename for display
+            with open(os.path.join(basedir, f'sales_data_{business_id}.meta'), 'w') as mf:
+                mf.write(original_filename)
             
             # Parse CSV to import into DB
             import csv

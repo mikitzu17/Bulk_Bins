@@ -1,35 +1,63 @@
 const API_URL = 'http://localhost:5000/api';
 
-export const getAiDashboard = async (businessId, granularity) => {
+export const uploadCsvForAnalysis = async (businessId, file) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/businesses/${businessId}/ai/dashboard?granularity=${granularity}`, {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch(`${API_URL}/businesses/${businessId}/transaction-import`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+    });
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Upload failed');
+    }
+    return { ...(await response.json()), filename: file.name };
+};
+
+export const getAiDashboard = async (businessId, granularity, startDate, endDate) => {
+    const token = localStorage.getItem('token');
+    let url = `${API_URL}/businesses/${businessId}/ai/dashboard?granularity=${granularity}`;
+    if (startDate) url += `&start_date=${startDate}`;
+    if (endDate) url += `&end_date=${endDate}`;
+    const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
     });
     if (!response.ok) throw new Error('Failed to fetch dashboard data');
     return await response.json();
 };
 
-export const getCsvAnalysis = async (businessId, granularity) => {
+export const getCsvAnalysis = async (businessId, granularity, startDate, endDate) => {
     const token = localStorage.getItem('token');
-    // For now, this can reuse the dashboard endpoint or a specific one if needed.
-    // Assuming CSV analysis is part of the main dashboard or similar.
-    // The user code calls this separately, so let's make a separate endpoint call or mock it for now.
-    // It seems to expect "total_stats" and "insights".
-    // I will map it to the same dashboard endpoint but maybe with a flag?
-    // Or just a separate endpoint. Let's start with a placeholder that returns valid structure.
+    let url = `${API_URL}/businesses/${businessId}/ai/csv-analysis?granularity=${granularity}`;
+    if (startDate) url += `&startDate=${startDate}`;
+    if (endDate) url += `&endDate=${endDate}`;
     try {
-        const response = await fetch(`${API_URL}/businesses/${businessId}/ai/csv-analysis?granularity=${granularity}`, {
+        const response = await fetch(url, {
             headers: { Authorization: `Bearer ${token}` }
         });
         if (response.ok) return await response.json();
     } catch (e) {
         console.warn("CSV Analysis endpoint not ready", e);
     }
+    return null;
+};
 
-    return {
-        total_stats: { margin: 0 },
-        insights: ["CSV analysis pending backend implementation."]
-    };
+export const getTransactionAnalysis = async (businessId, granularity, startDate, endDate) => {
+    const token = localStorage.getItem('token');
+    let url = `${API_URL}/businesses/${businessId}/ai/transaction-analysis?granularity=${granularity}`;
+    if (startDate) url += `&startDate=${startDate}`;
+    if (endDate) url += `&endDate=${endDate}`;
+    try {
+        const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.ok) return await response.json();
+    } catch (e) {
+        console.warn("Transaction Analysis endpoint not ready", e);
+    }
+    return null;
 };
 
 export const exportReportExcel = async (businessId) => {

@@ -118,7 +118,7 @@ export const AuthProvider = ({ children }) => {
 
             if (response.ok) {
                 setBusinesses([...businesses, data]);
-                toast.success(`Business "${name}" created!`);
+                toast.success(`Business "${name}" registered! Awaiting admin approval.`);
                 return data;
             } else {
                 toast.error(data.message || 'Failed to create business');

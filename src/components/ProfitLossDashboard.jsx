@@ -1,10 +1,11 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { formatINR, formatNum } from '../utils/formatCurrency';
 
 const COLORS = ['#22d3ee', '#3b82f6', '#818cf8', '#6366f1'];
 
-const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly' }) => {
+const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly', customStart, customEnd }) => {
     if (!data || data.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-20 opacity-30">
@@ -15,8 +16,8 @@ const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly' }) => 
     }
 
     const isDark = theme === 'dark';
-    const textColor = isDark ? '#94a3b8' : '#475569';
-    const gridColor = isDark ? '#ffffff10' : '#00000010';
+    const textColor = isDark ? '#cbd5e1' : '#475569';
+    const gridColor = isDark ? '#ffffff12' : '#00000010';
     const tooltipBg = isDark ? '#0f172a' : '#ffffff';
     const tooltipBorder = isDark ? '#ffffff10' : '#e2e8f0';
     const tooltipText = isDark ? '#f8fafc' : '#0f172a';
@@ -36,6 +37,25 @@ const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly' }) => 
             case 'monthly':
                 cutoffDate.setDate(cutoffDate.getDate() - 30);
                 break;
+            case 'quarterly':
+                cutoffDate.setDate(cutoffDate.getDate() - 90);
+                break;
+            case 'halfyearly':
+                cutoffDate.setDate(cutoffDate.getDate() - 180);
+                break;
+            case 'yearly':
+                cutoffDate.setDate(cutoffDate.getDate() - 365);
+                break;
+            case 'custom':
+                if (customStart && customEnd) {
+                    const start = new Date(customStart);
+                    const end = new Date(customEnd);
+                    return data.filter(item => {
+                        const itemDate = new Date(item.month || item.date);
+                        return itemDate >= start && itemDate <= end;
+                    });
+                }
+                return data;
             default:
                 return data;
         }
@@ -67,21 +87,21 @@ const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly' }) => 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="glass p-6 rounded-[2rem] border-slate-200 dark:border-white/5 bg-white/65 dark:bg-white/[0.02] backdrop-blur-[12px] shadow-xl shadow-black/5">
                     <div className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Revenue</div>
-                    <div className="text-4xl font-serif font-black text-[#0f172a] dark:text-white transition-all duration-500">₹{totalSales.toLocaleString()}</div>
+                    <div className="text-2xl md:text-3xl font-serif font-black text-[#0f172a] dark:text-white transition-all duration-500 truncate">{formatINR(totalSales)}</div>
                 </div>
                 <div className="glass p-6 rounded-[2rem] border-rose-500/20 bg-rose-500/10 backdrop-blur-[12px] shadow-xl shadow-black/5">
                     <div className="text-rose-500 dark:text-rose-400 text-[10px] font-black uppercase tracking-widest mb-2">Gross Profit</div>
-                    <div className="text-4xl font-serif font-black text-rose-500 dark:text-rose-400">₹{grossProfit.toLocaleString()}</div>
+                    <div className="text-2xl md:text-3xl font-serif font-black text-rose-500 dark:text-rose-400 truncate">{formatINR(grossProfit)}</div>
                     <div className="text-[8px] text-rose-500/60 font-bold uppercase mt-1 text-center">Sales - COGS</div>
                 </div>
                 <div className="glass p-6 rounded-[2rem] border-slate-200 dark:border-white/5 bg-white/65 dark:bg-white/[0.02] backdrop-blur-[12px] shadow-xl shadow-black/5">
                     <div className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Operating Expenses</div>
-                    <div className="text-4xl font-serif font-black text-slate-900 dark:text-white transition-all duration-500">₹{totalExpenses.toLocaleString()}</div>
+                    <div className="text-2xl md:text-3xl font-serif font-black text-slate-900 dark:text-white transition-all duration-500 truncate">{formatINR(totalExpenses)}</div>
                 </div>
                 <div className="glass p-6 rounded-[2rem] border-primary-500/20 bg-primary-500/10 backdrop-blur-[12px] shadow-xl shadow-black/5">
                     <div className="text-primary-500 dark:text-primary-400 text-[10px] font-black uppercase tracking-widest mb-2">Net Profit</div>
-                    <div className={`text-4xl font-serif font-black ${netProfit >= 0 ? 'text-primary-500 dark:text-primary-400' : 'text-red-500 dark:text-red-400'}`}>
-                        ₹{netProfit.toLocaleString()}
+                    <div className={`text-2xl md:text-3xl font-serif font-black truncate ${netProfit >= 0 ? 'text-primary-500 dark:text-primary-400' : 'text-red-500 dark:text-red-400'}`}>
+                        {formatINR(netProfit)}
                     </div>
                     <div className="text-[8px] text-primary-500/60 font-bold uppercase mt-1 text-center">Gross - Expenses</div>
                 </div>
@@ -117,7 +137,7 @@ const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly' }) => 
                                     itemStyle={{ fontSize: '12px' }}
                                     labelStyle={{ color: tooltipText }}
                                 />
-                                <Area type="monotone" dataKey="profit" stroke="#22d3ee" strokeWidth={5} fillOpacity={1} fill="url(#colorProfit)" />
+                                <Area type="monotone" dataKey="profit" stroke="#22d3ee" strokeWidth={3} fillOpacity={1} fill="url(#colorProfit)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -154,7 +174,7 @@ const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly' }) => 
                                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: i === 0 ? '#f43f5e' : '#3b82f6' }}></div>
                                     <span className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{item.name}</span>
                                 </div>
-                                <span className="text-xs font-serif text-slate-900 dark:text-white">₹{item.value.toLocaleString()}</span>
+                                <span className="text-xs font-serif text-slate-900 dark:text-white">{formatINR(item.value)}</span>
                             </div>
                         ))}
                     </div>

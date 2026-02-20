@@ -13,6 +13,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { TrendingUp, TrendingDown, DollarSign, Activity, Target } from 'lucide-react';
+import { formatINR } from '../utils/formatCurrency';
 
 ChartJS.register(
     CategoryScale,
@@ -31,16 +32,29 @@ const DashboardPreview = () => {
         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         datasets: [
             {
-                borderWidth: 5,
+                label: 'Revenue',
+                data: [4800, 5200, 4900, 5800, 6200, 7500, 6800],
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#6366f1',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                borderWidth: 3,
             },
             {
                 label: 'Net Profit',
                 data: [1200, 1100, 1600, 1500, 2100, 3200, 2800],
                 borderColor: '#10b981',
-                backgroundColor: 'transparent',
-                fill: false,
+                backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                fill: true,
                 tension: 0.4,
-                pointRadius: 0,
+                pointRadius: 4,
+                pointBackgroundColor: '#10b981',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
                 borderWidth: 3,
                 borderDash: [5, 5],
             }
@@ -71,7 +85,7 @@ const DashboardPreview = () => {
                 padding: 12,
                 displayColors: true,
                 callbacks: {
-                    label: (context) => ` ${context.dataset.label}: ₹${context.parsed.y.toLocaleString()}`
+                    label: (context) => ` ${context.dataset.label}: ${formatINR(context.parsed.y)}`
                 }
             }
         },
@@ -104,14 +118,14 @@ const DashboardPreview = () => {
                             <Activity className="text-primary-400 w-5 h-5 animate-pulse" />
                             <span className="text-primary-400 text-[10px] font-black uppercase tracking-[0.3em]">Operational Intelligence</span>
                         </div>
-                        <h3 className="text-3xl md:text-5xl font-serif text-[#0f172a] tracking-tight leading-tight">Weekly Performance Analytics</h3>
+                        <h3 className="text-2xl md:text-4xl font-serif text-[#0f172a] tracking-tight leading-tight">Weekly Performance Analytics</h3>
                         <p className="text-slate-700 text-lg mt-3 font-semibold">Financial health overview for the current billing cycle.</p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="glass px-6 py-3 rounded-2xl flex items-center space-x-3 border-white/5">
-                            <Target className="text-accent-400 w-5 h-5" />
+                        <div className="bg-slate-100/80 border border-slate-200 px-6 py-3 rounded-2xl flex items-center space-x-3">
+                            <Target className="text-indigo-500 w-5 h-5" />
                             <div className="flex flex-col">
-                                <span className="text-white font-bold text-sm">92%</span>
+                                <span className="text-slate-800 font-bold text-sm">92%</span>
                                 <span className="text-slate-500 text-[9px] uppercase font-bold tracking-widest">Goal Status</span>
                             </div>
                         </div>
@@ -140,7 +154,7 @@ const DashboardPreview = () => {
                                 </div>
                             </div>
                             <p className="text-slate-600 text-[10px] uppercase font-bold tracking-widest mb-1">{stat.label}</p>
-                            <p className="text-3xl font-serif text-[#0f172a] font-black">{stat.value}</p>
+                            <p className="text-2xl md:text-3xl font-serif text-[#0f172a] font-black truncate">{stat.value}</p>
                         </div>
                     ))}
                 </div>
@@ -148,11 +162,11 @@ const DashboardPreview = () => {
                 <div className="relative h-[450px] w-full bg-white/10 rounded-[2.5rem] p-10 border border-white/20 shadow-inner">
                     <div className="absolute top-8 left-10 flex items-center space-x-8 z-10">
                         <div className="flex items-center space-x-3">
-                            <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+                            <div className="w-4 h-4 rounded-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
                             <span className="text-[#0f172a] text-[11px] font-black uppercase tracking-widest">Revenue</span>
                         </div>
                         <div className="flex items-center space-x-3">
-                            <div className="w-4 h-4 rounded-full bg-slate-300 border-2 border-slate-400"></div>
+                            <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
                             <span className="text-slate-600 text-[11px] font-black uppercase tracking-widest">Profit</span>
                         </div>
                     </div>

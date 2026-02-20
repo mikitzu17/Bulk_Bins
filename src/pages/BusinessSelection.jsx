@@ -21,8 +21,11 @@ const BusinessSelection = () => {
             if (biz) {
                 setNewBusinessName('');
                 setIsCreating(false);
-                setCurrentBusiness(biz);
-                navigate(`/business/${biz.id}`);
+                // Don't navigate if pending approval
+                if (!biz.status || biz.status === 'approved') {
+                    setCurrentBusiness(biz);
+                    navigate(`/business/${biz.id}`);
+                }
             }
         }
     };
@@ -36,7 +39,7 @@ const BusinessSelection = () => {
         <div className="relative w-full min-h-screen flex flex-col items-center bg-slate-950 font-sans selection:bg-primary-500/30 overflow-x-hidden">
             {/* Fixed Immersive Background */}
             <div className="fixed inset-0 z-0">
-                <img src={FarmBg} alt="Background" className="w-full h-full object-cover scale-105 opacity-40 blur-[2px]" />
+                <img src={FarmBg} alt="Background" className="w-full h-full object-cover scale-105 opacity-40 blur-[1px]" />
                 <div className="absolute inset-0 bg-slate-950/80"></div>
             </div>
 
@@ -49,11 +52,12 @@ const BusinessSelection = () => {
                     </div>
                     <div className="flex items-center space-x-6">
                         <div className="flex flex-col items-end text-right hidden md:flex">
-                            <span className="text-white text-lg font-medium">{user?.name}</span>
+                            <span className="text-white text-xl font-bold">{user?.name}</span>
+                            <span className="text-xs text-primary-400 font-black uppercase tracking-[0.2em]">Authorized User</span>
                         </div>
                         <button
                             onClick={logout}
-                            className="glass px-6 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-red-500/10 transition-all text-sm uppercase tracking-widest font-medium"
+                            className="glass px-7 py-3 rounded-xl text-slate-200 hover:text-white hover:bg-red-500/10 transition-all text-sm uppercase tracking-widest font-black"
                         >
                             Log Out
                         </button>
@@ -63,42 +67,70 @@ const BusinessSelection = () => {
 
             <main className="relative z-10 w-full flex flex-col items-center py-12 md:py-20 flex-grow">
                 <div className="max-w-[1200px] w-full px-6 flex flex-col items-center">
-                    <div className="text-center mb-16">
-                        <h1 className="text-4xl md:text-6xl font-serif text-white mb-6 tracking-tighter">Select your business</h1>
-                        <p className="text-slate-400 text-lg font-medium">Choose a store to manage or initialize a new retail entity.</p>
+                    <div className="text-center mb-16 animate-fade-in">
+                        <h1 className="text-4xl md:text-6xl font-serif text-white mb-6 tracking-tighter">Authorized Entities</h1>
+                        <p className="text-slate-200 text-lg font-bold max-w-2xl mx-auto leading-relaxed">Select a registered business entity to access the management terminal or initialize a new store.</p>
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-8 w-full">
                         {businesses.map((biz) => (
-                            <div key={biz.id} className="glass p-8 rounded-[3rem] border-white/5 hover:border-primary-500/30 transition-all group relative animate-fade-in w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] max-w-sm">
-                                <div className="absolute top-8 right-8">
-                                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${biz.role === 'Owner' ? 'bg-primary-500/10 text-primary-400 border-primary-500/20' :
-                                        biz.role === 'Analyst' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                            'bg-slate-500/10 text-slate-400 border-white/10'
+                            <div key={biz.id} className={`glass p-8 rounded-[3rem] transition-all group relative animate-fade-in w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] max-w-sm ${biz.status === 'pending' ? 'border-amber-500/20 opacity-80' :
+                                biz.status === 'rejected' ? 'border-red-500/20 opacity-60' :
+                                    'border-white/5 hover:border-primary-500/30'
+                                }`}>
+                                <div className="absolute top-8 right-8 flex flex-col items-end space-y-3">
+                                    <span className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-[0.15em] border shadow-lg ${biz.role === 'Owner' ? 'bg-primary-500/20 text-primary-300 border-primary-500/40' :
+                                        biz.role === 'Analyst' ? 'bg-blue-500/20 text-blue-300 border-blue-500/40' :
+                                            'bg-slate-500/20 text-slate-100 border-white/20'
                                         }`}>
                                         {biz.role}
                                     </span>
+                                    {biz.status === 'pending' && (
+                                        <span className="px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest bg-amber-500/30 text-amber-200 border border-amber-500/50 animate-pulse shadow-lg">
+                                            ⏳ Pending Review
+                                        </span>
+                                    )}
+                                    {biz.status === 'rejected' && (
+                                        <span className="px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest bg-red-500/30 text-red-200 border border-red-500/50 shadow-lg">
+                                            ✕ Declined
+                                        </span>
+                                    )}
                                 </div>
 
-                                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-primary-400 mb-8 group-hover:bg-primary-500/10 transition-colors">
-                                    <Building2 className="w-8 h-8" />
+                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-primary-400 mb-8 transition-colors ${biz.status === 'pending' ? 'bg-amber-500/10' :
+                                    biz.status === 'rejected' ? 'bg-red-500/10' :
+                                        'bg-white/5 group-hover:bg-primary-500/10'
+                                    }`}>
+                                    <Building2 className={`w-9 h-9 ${biz.status === 'pending' ? 'text-amber-300' :
+                                        biz.status === 'rejected' ? 'text-red-300' :
+                                            'text-primary-300'
+                                        }`} />
                                 </div>
-                                <h3 className="text-2xl font-serif text-white mb-8 tracking-tight group-hover:translate-x-1 transition-transform">{biz.name}</h3>
+                                <h3 className="text-2xl font-serif text-white mb-8 tracking-tight group-hover:translate-x-1.5 transition-transform leading-tight">{biz.name}</h3>
 
-                                <div className="flex items-center gap-4">
-                                    <button
-                                        onClick={() => handleOpen(biz)}
-                                        className="flex-grow bg-primary-500 text-white py-4 rounded-2xl tracking-widest uppercase text-lg flex items-center justify-center space-x-2 hover:bg-primary-600 transition-all font-medium"
-                                    >
-                                        <span>Open</span>
-                                        <ExternalLink className="w-4 h-4" />
-                                    </button>
+                                <div className="flex items-center gap-5">
+                                    {(!biz.status || biz.status === 'approved') ? (
+                                        <button
+                                            onClick={() => handleOpen(biz)}
+                                            className="flex-grow bg-primary-500 text-white py-4.5 rounded-2xl tracking-[0.15em] uppercase text-lg flex items-center justify-center space-x-2 hover:bg-primary-600 transition-all font-black shadow-xl shadow-primary-500/20 hover:scale-[1.02] active:scale-95"
+                                        >
+                                            <span>Access</span>
+                                            <ExternalLink className="w-5 h-5" />
+                                        </button>
+                                    ) : (
+                                        <div className={`flex-grow py-5 rounded-3xl tracking-[0.15em] uppercase text-base flex items-center justify-center space-x-2 font-black cursor-not-allowed shadow-inner ${biz.status === 'pending'
+                                            ? 'bg-amber-500/20 text-amber-200 border border-amber-500/30'
+                                            : 'bg-red-500/20 text-red-200 border border-red-500/30'
+                                            }`}>
+                                            <span>{biz.status === 'pending' ? 'Reviewing...' : 'Unauthorized'}</span>
+                                        </div>
+                                    )}
                                     {biz.role === 'Owner' && (
                                         <button
                                             onClick={() => deleteBusiness(biz.id)}
-                                            className="p-4 rounded-2xl bg-white/5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all border border-white/10"
+                                            className="p-5 rounded-3xl bg-white/5 text-slate-300 hover:text-red-400 hover:bg-red-500/20 transition-all border border-white/10 shadow-lg hover:rotate-3"
                                         >
-                                            <Trash2 className="w-5 h-5" />
+                                            <Trash2 className="w-6 h-6" />
                                         </button>
                                     )}
                                 </div>
@@ -144,12 +176,12 @@ const BusinessSelection = () => {
                         ) : (
                             <button
                                 onClick={() => setIsCreating(true)}
-                                className="glass p-8 rounded-[3rem] border-dashed border-white/10 hover:border-primary-500/50 transition-all group flex flex-col items-center justify-center text-slate-500 hover:text-primary-400 min-h-[300px] w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] max-w-sm"
+                                className="glass p-8 rounded-[3rem] border-dashed border-white/20 hover:border-primary-500/50 transition-all group flex flex-col items-center justify-center text-slate-300 hover:text-primary-400 min-h-[320px] w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] max-w-sm shadow-2xl hover:scale-[1.02]"
                             >
-                                <div className="p-6 rounded-3xl bg-white/5 mb-6 group-hover:bg-primary-500/10 transition-all border border-dashed border-white/10">
+                                <div className="p-7 rounded-[1.5rem] bg-white/5 mb-6 group-hover:bg-primary-500/10 transition-all border border-dashed border-white/20 shadow-inner">
                                     <Plus className="w-10 h-10" />
                                 </div>
-                                <span className="uppercase tracking-[0.2em] text-sm font-medium">Create New Business</span>
+                                <span className="uppercase tracking-[0.2em] text-sm font-black">Register New Entity</span>
                             </button>
                         )}
                     </div>

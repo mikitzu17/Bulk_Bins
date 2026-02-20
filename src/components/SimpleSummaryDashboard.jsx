@@ -19,6 +19,7 @@ import {
     Legend
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { formatINR } from '../utils/formatCurrency';
 
 ChartJS.register(
     CategoryScale,
@@ -30,7 +31,9 @@ ChartJS.register(
 );
 
 const SimpleSummaryDashboard = ({ transactions = [] }) => {
-    const [period, setPeriod] = useState('Weekly'); // Daily, Weekly, Monthly, Quarterly, Yearly
+    const [period, setPeriod] = useState('Weekly');
+    const [customStart, setCustomStart] = useState('');
+    const [customEnd, setCustomEnd] = useState('');
 
     const aggregatedData = useMemo(() => {
         const now = new Date();
@@ -115,10 +118,48 @@ const SimpleSummaryDashboard = ({ transactions = [] }) => {
                 expenseData.push(yearTxns.filter(t => t.type === 'Expense').reduce((acc, t) => acc + t.amount, 0));
                 profitData.push(yearTxns.reduce((acc, t) => acc + (t.profit || (t.type === 'Sale' ? t.amount : -t.amount)), 0));
             });
+        } else if (period === 'HalfYearly') {
+            labels = ['H1 (Jan-Jun)', 'H2 (Jul-Dec)'];
+            for (let h = 0; h < 2; h++) {
+                const halfTxns = transactions.filter(t => {
+                    const tDate = new Date(t.timestamp);
+                    const m = tDate.getMonth();
+                    return tDate.getFullYear() === currentYear && (h === 0 ? m < 6 : m >= 6);
+                });
+                revenueData.push(halfTxns.filter(t => t.type === 'Sale').reduce((acc, t) => acc + t.amount, 0));
+                expenseData.push(halfTxns.filter(t => t.type === 'Expense').reduce((acc, t) => acc + t.amount, 0));
+                profitData.push(halfTxns.reduce((acc, t) => acc + (t.profit || (t.type === 'Sale' ? t.amount : -t.amount)), 0));
+            }
+        } else if (period === 'Custom') {
+            if (customStart && customEnd) {
+                const start = new Date(customStart);
+                const end = new Date(customEnd);
+                const filtered = transactions.filter(t => {
+                    const tDate = new Date(t.timestamp);
+                    return tDate >= start && tDate <= end;
+                });
+                // Group by month within the custom range
+                const monthMap = {};
+                filtered.forEach(t => {
+                    const d = new Date(t.timestamp);
+                    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                    if (!monthMap[key]) monthMap[key] = { rev: 0, exp: 0, prof: 0 };
+                    if (t.type === 'Sale') monthMap[key].rev += t.amount;
+                    if (t.type === 'Expense') monthMap[key].exp += t.amount;
+                    monthMap[key].prof += (t.profit || (t.type === 'Sale' ? t.amount : -t.amount));
+                });
+                const sortedKeys = Object.keys(monthMap).sort();
+                labels = sortedKeys;
+                sortedKeys.forEach(k => {
+                    revenueData.push(monthMap[k].rev);
+                    expenseData.push(monthMap[k].exp);
+                    profitData.push(monthMap[k].prof);
+                });
+            }
         }
 
         return { labels, revenueData, expenseData, profitData };
-    }, [transactions, period]);
+    }, [transactions, period, customStart, customEnd]);
 
     const chartData = {
         labels: aggregatedData.labels,
@@ -176,19 +217,39 @@ const SimpleSummaryDashboard = ({ transactions = [] }) => {
                     </div>
 
                     {/* Period Switcher */}
-                    <div className="flex bg-slate-100 p-1 rounded-xl">
-                        {['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly'].map((p) => (
+                    <div className="flex flex-wrap bg-slate-100 p-1 rounded-xl gap-1">
+                        {['Daily', 'Weekly', 'Monthly', 'Quarterly', 'HalfYearly', 'Yearly', 'Custom'].map((p) => (
                             <button
                                 key={p}
                                 onClick={() => setPeriod(p)}
-                                className={`px-4 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all ${period === p ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                className={`px-4 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all whitespace-nowrap ${period === p ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                                     }`}
                             >
-                                {p}
+                                {p === 'HalfYearly' ? 'Half-Year' : p === 'Custom' ? '📅 Custom' : p}
                             </button>
                         ))}
                     </div>
                 </div>
+
+                {/* Custom Date Range Pickers */}
+                {period === 'Custom' && (
+                    <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500 flex-shrink-0">From</span>
+                        <input
+                            type="date"
+                            value={customStart}
+                            onChange={(e) => setCustomStart(e.target.value)}
+                            className="px-3 py-2 bg-white border border-slate-200 text-slate-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                        />
+                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500 flex-shrink-0">To</span>
+                        <input
+                            type="date"
+                            value={customEnd}
+                            onChange={(e) => setCustomEnd(e.target.value)}
+                            className="px-3 py-2 bg-white border border-slate-200 text-slate-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                        />
+                    </div>
+                )}
 
                 <div className="h-[300px] mb-10">
                     <Bar data={chartData} options={options} />
@@ -217,7 +278,7 @@ const SimpleSummaryDashboard = ({ transactions = [] }) => {
                         <span className="font-bold">Current {period} Profit</span>
                     </div>
                     <div className="text-2xl font-black text-indigo-600">
-                        {periodTotalProfit >= 0 ? '+' : ''}₹{periodTotalProfit.toLocaleString()}
+                        {periodTotalProfit >= 0 ? '+' : ''}{formatINR(periodTotalProfit)}
                     </div>
                 </div>
             </div>

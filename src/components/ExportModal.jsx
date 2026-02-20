@@ -6,7 +6,7 @@ import CustomSelect from './CustomSelect';
 const API_URL = 'http://localhost:5000/api';
 
 const ExportModal = ({ isOpen, onClose, businessId, businessName }) => {
-    const [formats, setFormats] = useState(['pdf']);
+    const [formats, setFormats] = useState(['pdf', 'excel']);
     const [timeframe, setTimeframe] = useState('all');
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');

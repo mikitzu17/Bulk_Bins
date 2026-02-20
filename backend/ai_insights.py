@@ -44,7 +44,7 @@ def get_dashboard_stats(business_id):
     if not role:
         return jsonify({"error": "Forbidden"}), 403
 
-    granularity = request.args.get("granularity", "monthly") # daily, weekly, monthly
+    granularity = request.args.get("granularity", "monthly") # daily, weekly, monthly, quarterly, halfyearly, yearly, custom
 
     # Date Filtering
     end_date = datetime.utcnow()
@@ -52,6 +52,21 @@ def get_dashboard_stats(business_id):
         start_date = end_date - timedelta(days=1)
     elif granularity == 'weekly':
         start_date = end_date - timedelta(weeks=1)
+    elif granularity == 'quarterly':
+        start_date = end_date - timedelta(days=90)
+    elif granularity == 'halfyearly':
+        start_date = end_date - timedelta(days=182)
+    elif granularity == 'yearly':
+        start_date = end_date - timedelta(days=365)
+    elif granularity == 'custom':
+        custom_start = request.args.get('start_date')
+        custom_end = request.args.get('end_date')
+        if custom_start:
+            start_date = datetime.strptime(custom_start, '%Y-%m-%d')
+        else:
+            start_date = end_date - timedelta(days=30)
+        if custom_end:
+            end_date = datetime.strptime(custom_end, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
     else: # monthly (default)
         start_date = end_date - timedelta(days=30)
 
@@ -234,6 +249,28 @@ def get_dashboard_stats(business_id):
         points = 6
         delta_unit = timedelta(days=30)
         label_fmt = "%b"
+    elif granularity == "quarterly":
+        points = 4
+        delta_unit = timedelta(days=90)
+        label_fmt = "Q"
+    elif granularity == "halfyearly":
+        points = 4
+        delta_unit = timedelta(days=182)
+        label_fmt = "H"
+    elif granularity == "yearly":
+        points = 3
+        delta_unit = timedelta(days=365)
+        label_fmt = "%Y"
+    elif granularity == "custom":
+        # For custom range, divide the range into ~6 equal segments
+        custom_start = request.args.get('start_date')
+        custom_end = request.args.get('end_date')
+        c_start = datetime.strptime(custom_start, '%Y-%m-%d') if custom_start else today - timedelta(days=30)
+        c_end = datetime.strptime(custom_end, '%Y-%m-%d') if custom_end else today
+        total_days = max((c_end - c_start).days, 1)
+        points = min(8, max(3, total_days // 7 + 1))
+        delta_unit = timedelta(days=max(1, total_days // points))
+        label_fmt = "%d %b"
     else: # weekly
         points = 4
         delta_unit = timedelta(weeks=1)
@@ -258,6 +295,10 @@ def get_dashboard_stats(business_id):
         label = end_date.strftime(label_fmt)
         if granularity == "weekly":
              label = f"Week {i+1}"
+        elif granularity == "quarterly":
+             label = f"Q{i+1}"
+        elif granularity == "halfyearly":
+             label = f"H{i+1}"
         
         period_analysis.append({
             "label": label,
@@ -296,7 +337,21 @@ def get_dashboard_stats(business_id):
             "profit": float(m_sales - m_expenses)
         })
 
-    predicted_monthly_expenses = predict_demand(expense_series) * (4.3 if granularity == "weekly" else 30 if granularity == "daily" else 1) if expense_series else 0
+    # Expense forecast multiplier based on granularity
+    if granularity == "daily":
+        expense_multiplier = 30
+    elif granularity == "weekly":
+        expense_multiplier = 4.3
+    elif granularity == "quarterly":
+        expense_multiplier = 1 / 3
+    elif granularity == "halfyearly":
+        expense_multiplier = 1 / 6
+    elif granularity == "yearly":
+        expense_multiplier = 1 / 12
+    else:  # monthly / custom
+        expense_multiplier = 1
+
+    predicted_monthly_expenses = predict_demand(expense_series) * expense_multiplier if expense_series else 0
 
     return jsonify({
         "total_sales": total_sales,
@@ -347,6 +402,8 @@ def get_csv_analysis(business_id):
     if not auth: return jsonify({"error": "Unauthorized"}), 401
     
     granularity = request.args.get("granularity", "weekly")
+    start_date = request.args.get("startDate", None)
+    end_date = request.args.get("endDate", None)
     
     # Check uploads in backend dir
     backend_dir = os.path.dirname(os.path.abspath(__file__))
@@ -354,14 +411,69 @@ def get_csv_analysis(business_id):
     
     file_path = backend_csv
     
+    if not os.path.exists(file_path):
+        return jsonify({"error": "No CSV file uploaded yet"}), 404
+    
     result = run_analysis(file_path, granularity=granularity)
     
-    # Adjust plot_url to be consistent with app.py static hosting
-    # logic if needed, but 'uploads' is usually exposed. 
-    # 'app.py' serves send_from_directory for uploads/receipts.
-    # We might need to add a route for /uploads/charts if we want to view them.
-    # User code assumes /uploads/forecast_.png
+    # Read original filename from meta file
+    meta_path = os.path.join(backend_dir, f"sales_data_{business_id}.meta")
+    original_name = None
+    if os.path.exists(meta_path):
+        with open(meta_path, 'r') as mf:
+            original_name = mf.read().strip()
+    result['filename'] = original_name or f"sales_data_{business_id}.csv"
     
+    return jsonify(result)
+
+
+@ai_bp.route("/businesses/<int:business_id>/ai/transaction-analysis", methods=["GET"])
+def get_transaction_analysis(business_id):
+    auth = request.headers.get("Authorization")
+    if not auth: return jsonify({"error": "Unauthorized"}), 401
+
+    granularity = request.args.get("granularity", "weekly")
+    start_date = request.args.get("startDate", None)
+    end_date = request.args.get("endDate", None)
+
+    # Fetch all transactions from the database
+    query = Transaction.query.filter_by(business_id=business_id)
+
+    if start_date:
+        try:
+            query = query.filter(Transaction.timestamp >= datetime.strptime(start_date, '%Y-%m-%d'))
+        except ValueError:
+            pass
+    if end_date:
+        try:
+            query = query.filter(Transaction.timestamp <= datetime.strptime(end_date, '%Y-%m-%d'))
+        except ValueError:
+            pass
+
+    txns = query.order_by(Transaction.timestamp).all()
+
+    if not txns:
+        return jsonify({"error": "No transactions found"}), 404
+
+    # Build a temporary CSV in memory from transactions
+    import tempfile, csv
+    tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False, newline='', encoding='utf-8')
+    writer = csv.writer(tmp)
+    writer.writerow(['Date', 'Type', 'Category', 'Amount'])
+    for t in txns:
+        writer.writerow([t.timestamp.strftime('%Y-%m-%d'), t.type, t.category or 'Others', t.amount])
+    tmp.close()
+
+    result = run_analysis(tmp.name, granularity=granularity)
+    result['source'] = 'transactions'
+    result['record_count'] = len(txns)
+
+    # Clean up temp file
+    try:
+        os.unlink(tmp.name)
+    except:
+        pass
+
     return jsonify(result)
 
 @ai_bp.route("/businesses/<int:business_id>/ai/export-data", methods=["GET"])

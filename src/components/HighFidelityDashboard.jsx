@@ -25,6 +25,7 @@ import {
     Legend
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { formatINR } from '../utils/formatCurrency';
 
 ChartJS.register(
     CategoryScale,
@@ -121,14 +122,14 @@ const HighFidelityDashboard = ({
                 cornerRadius: 8,
                 displayColors: false,
                 callbacks: {
-                    label: (context) => ` ${context.dataset.label}: ₹${context.parsed.y.toLocaleString()}`
+                    label: (context) => ` ${context.dataset.label}: ${formatINR(context.parsed.y)}`
                 }
             }
         },
         scales: {
             y: {
                 grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
-                ticks: { color: '#64748b', font: { size: 10 }, callback: (value) => '₹' + value / 1000 + 'k' }
+                ticks: { color: '#64748b', font: { size: 10 }, callback: (value) => formatINR(value) }
             },
             x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } },
         },
@@ -198,10 +199,10 @@ const HighFidelityDashboard = ({
                     {/* Sub Stats Row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
-                            { label: 'Total Volume', value: `₹${totalRevenue.toLocaleString()}`, icon: Layers, color: 'text-primary-400' },
-                            { label: 'Net Variance', value: `₹${netProfit.toLocaleString()}`, icon: Zap, color: 'text-emerald-400' },
-                            { label: 'Asset Valuation', value: `₹${inventoryValuation.toLocaleString()}`, icon: Package, color: 'text-blue-400' },
-                            { label: 'Cumulative COGS', value: `₹${totalCogs.toLocaleString()}`, icon: DollarSign, color: 'text-rose-400' }
+                            { label: 'Total Volume', value: formatINR(totalRevenue), icon: Layers, color: 'text-primary-400' },
+                            { label: 'Net Variance', value: formatINR(netProfit), icon: Zap, color: 'text-emerald-400' },
+                            { label: 'Asset Valuation', value: formatINR(inventoryValuation), icon: Package, color: 'text-blue-400' },
+                            { label: 'Cumulative COGS', value: formatINR(totalCogs), icon: DollarSign, color: 'text-rose-400' }
                         ].map((stat, i) => (
                             <div key={i} className="glass p-6 rounded-3xl border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-colors">
                                 <div className="flex items-center space-x-3 mb-4">
@@ -288,8 +289,8 @@ const HighFidelityDashboard = ({
                                 <div className="space-y-3">
                                     {reorders.slice(0, 4).map((rec, i) => (
                                         <div key={i} className={`flex flex-col p-4 rounded-3xl border transition-all group ${rec.category === 'Critical' ? 'bg-rose-500/5 border-rose-500/20 hover:bg-rose-500/10' :
-                                                rec.category === 'Warning' ? 'bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10' :
-                                                    'bg-white/[0.02] border-white/5 hover:bg-white/[0.04]'
+                                            rec.category === 'Warning' ? 'bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10' :
+                                                'bg-white/[0.02] border-white/5 hover:bg-white/[0.04]'
                                             }`}>
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className="flex items-center space-x-2">

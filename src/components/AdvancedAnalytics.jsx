@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Line, Doughnut } from 'react-chartjs-2';
+import { formatINR, formatNum } from '../utils/formatCurrency';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -63,9 +64,9 @@ const AdvancedAnalytics = ({ businessId, onClose, theme }) => {
     if (!data) return null;
 
     const isDark = theme === 'dark';
-    const textColor = isDark ? '#94a3b8' : '#475569';
-    const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-    const tooltipBg = isDark ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255, 255, 255, 0.95)';
+    const textColor = isDark ? '#cbd5e1' : '#475569';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+    const tooltipBg = isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.98)';
     const tooltipText = isDark ? '#f8fafc' : '#0f172a';
     const tooltipBody = isDark ? '#cbd5e1' : '#334155';
     const tooltipBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
@@ -82,18 +83,29 @@ const AdvancedAnalytics = ({ businessId, onClose, theme }) => {
             {
                 label: 'Sales Revenue',
                 data: data.daily_trends.map(d => d.sales),
-                borderColor: '#22d3ee', // Cyan
-                backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                borderColor: isDark ? '#22d3ee' : '#0891b2',
+                backgroundColor: isDark ? 'rgba(34, 211, 238, 0.12)' : 'rgba(8, 145, 178, 0.1)',
                 tension: 0.4,
-                fill: true
+                fill: true,
+                borderWidth: 3,
+                pointRadius: 4,
+                pointBackgroundColor: isDark ? '#22d3ee' : '#0891b2',
+                pointBorderColor: isDark ? '#1e293b' : '#fff',
+                pointBorderWidth: 2,
             },
             {
                 label: 'Operating Expenses',
                 data: data.daily_trends.map(d => d.expenses),
-                borderColor: '#f43f5e', // Rose
-                backgroundColor: 'rgba(244, 63, 94, 0.05)',
+                borderColor: isDark ? '#fb7185' : '#e11d48',
+                backgroundColor: isDark ? 'rgba(251, 113, 133, 0.08)' : 'rgba(225, 29, 72, 0.06)',
                 tension: 0.4,
-                fill: true
+                fill: true,
+                borderWidth: 3,
+                borderDash: [5, 5],
+                pointRadius: 4,
+                pointBackgroundColor: isDark ? '#fb7185' : '#e11d48',
+                pointBorderColor: isDark ? '#1e293b' : '#fff',
+                pointBorderWidth: 2,
             }
         ]
     };
@@ -102,7 +114,7 @@ const AdvancedAnalytics = ({ businessId, onClose, theme }) => {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { position: 'top', labels: { color: textColor, usePointStyle: true, font: { family: 'serif', size: 11 } } },
+            legend: { display: false },
             tooltip: {
                 mode: 'index',
                 intersect: false,
@@ -110,42 +122,70 @@ const AdvancedAnalytics = ({ businessId, onClose, theme }) => {
                 titleColor: tooltipText,
                 bodyColor: tooltipBody,
                 borderColor: tooltipBorder,
-                borderWidth: 1
+                borderWidth: 1,
+                padding: 12,
+                displayColors: true,
+                callbacks: {
+                    label: (context) => ` ${context.dataset.label}: ${formatINR(context.parsed.y)}`
+                }
             }
         },
         scales: {
-            x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
-            y: { grid: { color: gridColor }, ticks: { color: textColor, callback: (v) => '₹' + v } }
+            x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } },
+            y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 11 }, callback: (v) => formatINR(v) } }
         },
         interaction: { mode: 'nearest', axis: 'x', intersect: false }
     };
 
-    const createDoughnutData = (items, colorBase) => ({
+    // Curated vibrant color palettes for doughnut charts
+    const salesColors = isDark
+        ? ['#22d3ee', '#38bdf8', '#60a5fa', '#818cf8', '#a78bfa', '#c084fc', '#e879f9', '#f472b6', '#fb7185']
+        : ['#0891b2', '#0284c7', '#2563eb', '#4f46e5', '#7c3aed', '#9333ea', '#c026d3', '#db2777', '#e11d48'];
+    const expenseColors = isDark
+        ? ['#fb7185', '#f97316', '#fbbf24', '#a3e635', '#34d399', '#2dd4bf', '#38bdf8', '#818cf8', '#e879f9']
+        : ['#e11d48', '#ea580c', '#d97706', '#65a30d', '#059669', '#0d9488', '#0284c7', '#4f46e5', '#c026d3'];
+
+    const createDoughnutData = (items, colors) => ({
         labels: items.map(i => i.name),
         datasets: [{
             data: items.map(i => i.value),
-            backgroundColor: items.map((_, i) => `hsl(${colorBase}, 70%, ${60 - (i * 5)}%)`),
-            borderWidth: 0,
-            hoverOffset: 10
+            backgroundColor: colors.slice(0, items.length),
+            borderColor: isDark ? '#1e293b' : '#ffffff',
+            borderWidth: 2,
+            hoverOffset: 12
         }]
     });
 
     const doughnutOptions = {
         responsive: true,
         plugins: {
-            legend: { position: 'right', labels: { color: textColor, font: { size: 10 }, usePointStyle: true } }
+            legend: {
+                position: 'right',
+                labels: {
+                    color: textColor,
+                    font: { size: 11, weight: 'bold' },
+                    usePointStyle: true,
+                    padding: 12
+                }
+            },
+            tooltip: {
+                backgroundColor: tooltipBg,
+                titleColor: tooltipText,
+                bodyColor: tooltipBody,
+                borderColor: tooltipBorder,
+                borderWidth: 1,
+                padding: 10,
+                callbacks: {
+                    label: (context) => ` ${context.label}: ${formatINR(context.parsed)}`
+                }
+            }
         },
-        cutout: '75%'
+        cutout: '72%'
     };
 
     const totalSales = data.daily_trends.reduce((acc, curr) => acc + (curr.sales || 0), 0);
     const totalExpenses = data.daily_trends.reduce((acc, curr) => acc + (curr.expenses || 0), 0);
     const netProfit = totalSales - totalExpenses;
-
-    const modifiedLineChartData = {
-        ...lineChartData,
-        datasets: lineChartData.datasets.map(ds => ({ ...ds, borderWidth: 5 }))
-    };
 
     return (
         <div className="animate-fade-in space-y-8">
@@ -164,7 +204,7 @@ const AdvancedAnalytics = ({ businessId, onClose, theme }) => {
                 <div className="flex items-center gap-4">
                     <div className="glass px-8 py-5 rounded-[2rem] bg-emerald-500/10 border-emerald-500/20 backdrop-blur-[12px] shadow-xl shadow-black/5">
                         <div className="text-emerald-500 dark:text-emerald-400 text-[10px] uppercase tracking-widest font-black">Net Profit (30d)</div>
-                        <div className="text-4xl font-serif font-black text-emerald-500 dark:text-emerald-400">₹{netProfit.toLocaleString()}</div>
+                        <div className="text-2xl md:text-3xl font-serif font-black text-emerald-500 dark:text-emerald-400 truncate">{formatINR(netProfit)}</div>
                     </div>
                 </div>
             </div>
@@ -186,7 +226,7 @@ const AdvancedAnalytics = ({ businessId, onClose, theme }) => {
                     </div>
                 </div>
                 <div className="h-[350px] w-full">
-                    <Line data={modifiedLineChartData} options={lineOptions} />
+                    <Line data={lineChartData} options={lineOptions} />
                 </div>
             </div>
 
@@ -199,7 +239,7 @@ const AdvancedAnalytics = ({ businessId, onClose, theme }) => {
                         Revenue Sources
                     </h3>
                     <div className="h-[300px] flex items-center justify-center">
-                        <Doughnut data={createDoughnutData(data.sales_by_category, 190)} options={doughnutOptions} />
+                        <Doughnut data={createDoughnutData(data.sales_by_category, salesColors)} options={doughnutOptions} />
                     </div>
                 </div>
 
@@ -210,7 +250,7 @@ const AdvancedAnalytics = ({ businessId, onClose, theme }) => {
                         Cost Distribution
                     </h3>
                     <div className="h-[300px] flex items-center justify-center">
-                        <Doughnut data={createDoughnutData(data.expenses_by_category, 340)} options={doughnutOptions} />
+                        <Doughnut data={createDoughnutData(data.expenses_by_category, expenseColors)} options={doughnutOptions} />
                     </div>
                 </div>
             </div>

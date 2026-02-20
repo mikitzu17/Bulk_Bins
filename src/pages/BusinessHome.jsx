@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { LayoutDashboard, Users, Settings, Package, ArrowLeft, BarChart3, TrendingUp, DollarSign, Plus, AlertCircle, Wand2, ArrowRight, Sun, Moon, LogOut, Download, Upload } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, Package, ArrowLeft, BarChart3, TrendingUp, DollarSign, Plus, AlertCircle, Wand2, ArrowRight, Sun, Moon, LogOut, Download, Upload, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { formatINR } from '../utils/formatCurrency';
 import ProfitLossDashboard from '../components/ProfitLossDashboard';
 import AdvancedAnalytics from '../components/AdvancedAnalytics';
 import Dashboard from '../components/AiDashboard';
@@ -52,7 +53,7 @@ const BusinessHome = () => {
         type: 'Sale',
         description: '',
         inventory_item_id: '',
-        quantity: 1,
+        quantity: '',
         timestamp: new Date().toISOString().split('T')[0]
     });
     const [inventoryInsights, setInventoryInsights] = useState(null);
@@ -60,6 +61,7 @@ const BusinessHome = () => {
     const [receiptFile, setReceiptFile] = useState(null);
     const [showAdvancedAnalytics, setShowAdvancedAnalytics] = useState(false);
     const [overviewMode, setOverviewMode] = useState('Premium'); // Premium or Simple
+    const [inventorySearch, setInventorySearch] = useState('');
 
     // Pagination state
     const [transactionPage, setTransactionPage] = useState(1);
@@ -74,7 +76,9 @@ const BusinessHome = () => {
     const itemsPerPage = 5;
 
     // Report frequency state
-    const [reportGranularity, setReportGranularity] = useState('monthly'); // daily, weekly, monthly
+    const [reportGranularity, setReportGranularity] = useState('monthly');
+    const [pnlCustomStart, setPnlCustomStart] = useState('');
+    const [pnlCustomEnd, setPnlCustomEnd] = useState('');
 
     const navigate = useNavigate();
 
@@ -437,7 +441,7 @@ const BusinessHome = () => {
 
         // Add metadata for AI Analysis (Profit calculation etc.)
         if (transactionForm.type === 'Sale' && transactionForm.inventory_item_id) {
-            const item = inventory.find(i => i.id.toString() === transactionForm.inventory_item_id);
+            const item = inventory.find(i => i.id.toString() === transactionForm.inventory_item_id?.toString());
             if (item) {
                 const metadata = {
                     cost_price_at_time: item.cost_price,
@@ -464,7 +468,7 @@ const BusinessHome = () => {
             if (response.ok) {
                 toast.success('Transaction recorded');
                 setIsAddingTransaction(false);
-                setTransactionForm({ amount: '', category: 'Produce', type: 'Sale', description: '', inventory_item_id: '', quantity: 1, timestamp: new Date().toISOString().slice(0, 16) });
+                setTransactionForm({ amount: '', category: 'Produce', type: 'Sale', description: '', inventory_item_id: '', quantity: '', timestamp: new Date().toISOString().split('T')[0] });
                 setReceiptFile(null);
                 fetchTransactions();
                 fetchInventory(); // Refresh inventory stock
@@ -500,7 +504,7 @@ const BusinessHome = () => {
                 toast.success('Transaction updated');
                 setIsEditingTransaction(false);
                 setEditingTransaction(null);
-                setTransactionForm({ amount: '', category: 'Produce', type: 'Sale', description: '', inventory_item_id: '', quantity: 1, timestamp: new Date().toISOString().slice(0, 16) });
+                setTransactionForm({ amount: '', category: 'Produce', type: 'Sale', description: '', inventory_item_id: '', quantity: '', timestamp: new Date().toISOString().split('T')[0] });
                 setReceiptFile(null);
                 fetchTransactions();
                 fetchInventory(); // Refresh inventory stock
@@ -745,12 +749,13 @@ const BusinessHome = () => {
                                             <CustomSelect
                                                 value={transactionForm.inventory_item_id}
                                                 onChange={(e) => {
-                                                    const itemId = e.target.value;
+                                                    const itemId = e.target.value?.toString();
                                                     const item = inventory.find(i => i.id.toString() === itemId);
+                                                    const qty = parseInt(transactionForm.quantity) || 0;
                                                     setTransactionForm({
                                                         ...transactionForm,
                                                         inventory_item_id: itemId,
-                                                        amount: item ? item.selling_price * transactionForm.quantity : '',
+                                                        amount: (item && qty > 0) ? item.selling_price * qty : '',
                                                     });
                                                 }}
                                                 placeholder="Select Item"
@@ -770,13 +775,15 @@ const BusinessHome = () => {
                                                 type="number"
                                                 value={transactionForm.quantity}
                                                 min="1"
+                                                placeholder="Enter quantity"
                                                 onChange={(e) => {
-                                                    const qty = parseInt(e.target.value) || 1;
-                                                    const item = inventory.find(i => i.id.toString() === transactionForm.inventory_item_id);
+                                                    const val = e.target.value;
+                                                    const qty = val === '' ? '' : parseInt(val);
+                                                    const item = inventory.find(i => i.id.toString() === transactionForm.inventory_item_id?.toString());
                                                     setTransactionForm({
                                                         ...transactionForm,
                                                         quantity: qty,
-                                                        amount: item ? item.selling_price * qty : transactionForm.amount
+                                                        amount: (item && qty > 0) ? item.selling_price * qty : ''
                                                     });
                                                 }}
                                                 className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-900 dark:text-white text-lg focus:border-primary-500/50 transition-all font-serif"
@@ -817,28 +824,47 @@ const BusinessHome = () => {
                                         </button>
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">Manual Date Selection</label>
-                                    <input
-                                        type="date"
-                                        value={transactionForm.timestamp}
-                                        max={new Date().toISOString().split('T')[0]}
-                                        onChange={(e) => setTransactionForm({ ...transactionForm, timestamp: e.target.value })}
-                                        className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-900 dark:text-white text-sm focus:border-primary-500/50 transition-all font-bold"
-                                        required
-                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">Date</label>
+                                        <input
+                                            type="date"
+                                            value={transactionForm.timestamp}
+                                            max={new Date().toISOString().split('T')[0]}
+                                            onChange={(e) => setTransactionForm({ ...transactionForm, timestamp: e.target.value })}
+                                            className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-900 dark:text-white text-sm focus:border-primary-500/50 transition-all font-bold"
+                                            required
+                                        />
+                                    </div>
+                                    {transactionForm.type === 'Sale' && transactionForm.inventory_item_id && (() => {
+                                        const selectedItem = inventory.find(i => i.id.toString() === transactionForm.inventory_item_id?.toString());
+                                        return selectedItem ? (
+                                            <div>
+                                                <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">Unit Selling Price</label>
+                                                <div className="w-full bg-emerald-500/10 border border-emerald-500/20 rounded-2xl py-4 px-6 flex items-center justify-between">
+                                                    <span className="text-emerald-600 dark:text-emerald-400 text-2xl font-serif font-black">₹{selectedItem.selling_price}</span>
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">per unit</span>
+                                                </div>
+                                            </div>
+                                        ) : null;
+                                    })()}
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">Final Amount (₹)</label>
+                                    <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">
+                                        Final Amount (₹)
+                                        {transactionForm.type === 'Sale' && transactionForm.inventory_item_id && transactionForm.quantity && (
+                                            <span className="ml-2 text-emerald-500 text-[9px] font-bold">⚡ Auto-calculated</span>
+                                        )}
+                                    </label>
                                     <input
                                         type="number"
-                                        placeholder="0.00"
+                                        placeholder="Enter amount"
                                         className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-900 dark:text-white text-lg focus:border-primary-500/50 transition-all font-serif"
                                         value={transactionForm.amount}
-                                        onChange={(e) => setTransactionForm({ ...transactionForm, amount: parseFloat(e.target.value) || 0 })}
+                                        onChange={(e) => setTransactionForm({ ...transactionForm, amount: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                                         required
                                     />
                                 </div>
@@ -954,7 +980,7 @@ const BusinessHome = () => {
                                     {role}
                                 </span>
                             </div>
-                            <h1 className="text-4xl md:text-5xl font-serif tracking-tighter text-slate-900 dark:text-white">
+                            <h1 className="text-3xl md:text-4xl font-serif tracking-tighter text-slate-900 dark:text-white truncate">
                                 {currentBusiness.name}
                             </h1>
                         </div>
@@ -973,11 +999,11 @@ const BusinessHome = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                     <div className="glass p-6 rounded-2xl border-primary-500/20 bg-primary-500/5">
                                         <div className="text-primary-400 text-[10px] font-black uppercase tracking-widest mb-1">7-Day Forecast</div>
-                                        <div className="text-2xl font-serif text-slate-900 dark:text-white">₹{aiPredictions.predictions['7_day'].toLocaleString()}</div>
+                                        <div className="text-2xl font-serif text-slate-900 dark:text-white">{formatINR(aiPredictions.predictions['7_day'])}</div>
                                     </div>
                                     <div className="glass p-6 rounded-2xl border-blue-500/20 bg-blue-500/5">
                                         <div className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-1">30-Day Forecast</div>
-                                        <div className="text-2xl font-serif text-slate-900 dark:text-white">₹{aiPredictions.predictions['30_day'].toLocaleString()}</div>
+                                        <div className="text-2xl font-serif text-slate-900 dark:text-white">{formatINR(aiPredictions.predictions['30_day'])}</div>
                                     </div>
                                     {aiPredictions.overspending.alert && (
                                         <div className="glass p-6 rounded-2xl border-red-500/30 bg-red-500/10 col-span-1 md:col-span-2 flex items-center space-x-4 animate-pulse">
@@ -986,7 +1012,7 @@ const BusinessHome = () => {
                                             </div>
                                             <div>
                                                 <div className="text-red-500 dark:text-red-400 text-[10px] font-black uppercase tracking-widest">Overspending Alert</div>
-                                                <div className="text-sm text-slate-600 dark:text-white/80">Current spending is ₹{aiPredictions.overspending.excess_amount.toLocaleString()} above average.</div>
+                                                <div className="text-sm text-slate-600 dark:text-white/80">Current spending is {formatINR(aiPredictions.overspending.excess_amount)} above average.</div>
                                             </div>
                                         </div>
                                     )}
@@ -998,7 +1024,7 @@ const BusinessHome = () => {
                                 <div>
                                     {!showAdvancedAnalytics && (
                                         <>
-                                            <h2 className="text-4xl font-serif text-slate-900 dark:text-white mb-2">Profit & Loss</h2>
+                                            <h2 className="text-2xl md:text-3xl font-serif text-slate-900 dark:text-white mb-2">Profit & Loss</h2>
                                             <p className="text-slate-500 dark:text-slate-400 text-sm">Visualizing your financial health for the last 6 months.</p>
                                         </>
                                     )}
@@ -1026,28 +1052,44 @@ const BusinessHome = () => {
 
                                 {/* Report Frequency Toggle */}
                                 {!showAdvancedAnalytics && pnlData && pnlData.length > 0 && (
-                                    <div className="mb-8 flex justify-end">
-                                        <div className="bg-slate-100 dark:bg-white/5 p-1.5 rounded-[20px] shadow-sm border border-slate-200 dark:border-white/10 flex gap-1">
-                                            {['daily', 'weekly', 'monthly'].map((freq) => (
+                                    <div className="mb-8">
+                                        <div className="bg-slate-100 dark:bg-white/5 p-1.5 rounded-[20px] shadow-sm border border-slate-200 dark:border-white/10 flex flex-wrap gap-1">
+                                            {[
+                                                { key: 'daily', label: 'Daily' },
+                                                { key: 'weekly', label: 'Weekly' },
+                                                { key: 'monthly', label: 'Monthly' },
+                                                { key: 'quarterly', label: 'Quarterly' },
+                                                { key: 'halfyearly', label: 'Half-Year' },
+                                                { key: 'yearly', label: 'Yearly' },
+                                                { key: 'custom', label: '📅 Custom' },
+                                            ].map((g) => (
                                                 <button
-                                                    key={freq}
-                                                    onClick={() => setReportGranularity(freq)}
-                                                    className={`px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${reportGranularity === freq
+                                                    key={g.key}
+                                                    onClick={() => setReportGranularity(g.key)}
+                                                    className={`px-4 md:px-5 py-2 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${reportGranularity === g.key
                                                         ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
                                                         : 'text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-500 hover:bg-primary-500/10 dark:hover:bg-primary-500/5'
                                                         }`}
                                                 >
-                                                    {freq}
+                                                    {g.label}
                                                 </button>
                                             ))}
                                         </div>
+                                        {reportGranularity === 'custom' && (
+                                            <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-white/60 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
+                                                <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 flex-shrink-0">From</span>
+                                                <input type="date" value={pnlCustomStart} onChange={(e) => setPnlCustomStart(e.target.value)} className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" />
+                                                <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 flex-shrink-0">To</span>
+                                                <input type="date" value={pnlCustomEnd} onChange={(e) => setPnlCustomEnd(e.target.value)} className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" />
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
                                 {showAdvancedAnalytics ? (
                                     <AdvancedAnalytics businessId={id} onClose={() => setShowAdvancedAnalytics(false)} theme={theme} />
                                 ) : (
-                                    <ProfitLossDashboard data={pnlData} theme={theme} reportGranularity={reportGranularity} />
+                                    <ProfitLossDashboard data={pnlData} theme={theme} reportGranularity={reportGranularity} customStart={pnlCustomStart} customEnd={pnlCustomEnd} />
                                 )}
                             </div>
                         </div>
@@ -1060,10 +1102,28 @@ const BusinessHome = () => {
 
                     {activeTab === 'Inventory' && (
                         <div className="space-y-12 pb-24">
-                            <div className="flex justify-between items-center mb-4">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                                 <div>
-                                    <h2 className="text-4xl font-serif font-bold tracking-tight text-slate-900 dark:text-white">Inventory Management</h2>
+                                    <h2 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-slate-900 dark:text-white">Inventory Management</h2>
                                     <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Centralized Asset Ledger</p>
+                                </div>
+                                <div className="relative w-full md:w-80">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search by name, category…"
+                                        value={inventorySearch}
+                                        onChange={(e) => setInventorySearch(e.target.value)}
+                                        className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-white font-semibold placeholder:text-slate-400 focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/10 transition-all"
+                                    />
+                                    {inventorySearch && (
+                                        <button
+                                            onClick={() => setInventorySearch('')}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+                                        >
+                                            <Plus className="w-4 h-4 rotate-45" />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -1226,7 +1286,14 @@ const BusinessHome = () => {
                                 { title: 'Meat & Seafood', icon: '🥩', filter: (p) => p.category === 'Meat', key: 'Meat' },
                                 { title: 'Other Essentials', icon: '📦', filter: (p) => !['Produce', 'Bakery', 'Dairy', 'Meat'].includes(p.category), key: 'Others' }
                             ].map((section, idx) => {
-                                const products = inventory.filter(section.filter);
+                                const searchTerm = inventorySearch.toLowerCase().trim();
+                                const products = inventory.filter(p => {
+                                    if (!section.filter(p)) return false;
+                                    if (!searchTerm) return true;
+                                    return p.name?.toLowerCase().includes(searchTerm) ||
+                                        p.category?.toLowerCase().includes(searchTerm) ||
+                                        p.description?.toLowerCase().includes(searchTerm);
+                                });
                                 const currentPage = inventoryPages[section.key] || 1;
                                 const totalPages = Math.ceil(products.length / itemsPerPage);
                                 const paginatedProducts = products.slice(
@@ -1276,11 +1343,11 @@ const BusinessHome = () => {
                                                                     <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest line-clamp-1">{item.description || item.category}</div>
                                                                 </td>
                                                                 <td className="p-8">
-                                                                    <div className="text-xl font-serif text-primary-400 mb-1">₹{item.selling_price.toLocaleString()}</div>
-                                                                    <div className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">Basic Cost: ₹{(item.cost_price || 0).toLocaleString()}</div>
+                                                                    <div className="text-xl font-serif text-primary-400 mb-1">{formatINR(item.selling_price)}</div>
+                                                                    <div className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">Basic Cost: {formatINR(item.cost_price || 0)}</div>
                                                                 </td>
                                                                 <td className="p-8">
-                                                                    <div className="text-sm font-bold text-slate-900 dark:text-white mb-1">₹{(item.selling_price - (item.cost_price || 0)).toLocaleString()} Profit</div>
+                                                                    <div className="text-sm font-bold text-slate-900 dark:text-white mb-1">{formatINR(item.selling_price - (item.cost_price || 0))} Profit</div>
                                                                     <div className="flex items-center space-x-2">
                                                                         <span className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">ROI:</span>
                                                                         <span className={`text-[10px] font-black ${item.cost_price > 0 && (item.selling_price - item.cost_price) / item.cost_price > 0.5 ? 'text-green-400' : 'text-slate-400'}`}>
@@ -1399,7 +1466,7 @@ const BusinessHome = () => {
                         <div className="space-y-8">
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
                                 <div>
-                                    <h2 className="text-4xl font-serif font-bold tracking-tight text-slate-900 dark:text-white">Financial Ledger</h2>
+                                    <h2 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-slate-900 dark:text-white">Financial Ledger</h2>
                                     <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Live Transaction Stream</p>
                                 </div>
                                 <div className="flex flex-wrap gap-3">
@@ -1478,11 +1545,11 @@ const BusinessHome = () => {
                                                     <div className="flex items-center space-x-6">
                                                         <div className="text-right mr-4">
                                                             <div className={`text-2xl font-serif ${txn.type === 'Sale' ? 'text-green-400' : 'text-red-400'}`}>
-                                                                {txn.type === 'Sale' ? '+' : '-'}₹{txn.amount.toLocaleString()}
+                                                                {txn.type === 'Sale' ? '+' : '-'}{formatINR(txn.amount)}
                                                             </div>
                                                             {txn.profit !== undefined && (
                                                                 <div className={`text-[10px] font-bold uppercase tracking-widest ${txn.profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                                                    Profit: {txn.profit >= 0 ? '+' : '-'}₹{Math.abs(txn.profit).toLocaleString()}
+                                                                    Profit: {txn.profit >= 0 ? '+' : '-'}{formatINR(Math.abs(txn.profit))}
                                                                 </div>
                                                             )}
                                                             {txn.type === 'Sale' && txn.quantity > 1 && (

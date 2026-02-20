@@ -17,6 +17,7 @@ import {
     Filler,
 } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
+import { formatINR } from '../utils/formatCurrency';
 
 ChartJS.register(
     CategoryScale,
@@ -57,6 +58,8 @@ function Dashboard({ businessId: propBusinessId, theme }) {
         }
     });
     const [reportGranularity, setReportGranularity] = useState('weekly');
+    const [customStart, setCustomStart] = useState('');
+    const [customEnd, setCustomEnd] = useState('');
     const [showExportMenu, setShowExportMenu] = useState(false);
     const [showReportsMenu, setShowReportsMenu] = useState(false);
 
@@ -82,9 +85,13 @@ function Dashboard({ businessId: propBusinessId, theme }) {
 
     useEffect(() => {
         if (businessId) {
-            getAiDashboard(businessId, reportGranularity).then(setStats).catch(console.error);
+            if (reportGranularity === 'custom' && customStart && customEnd) {
+                getAiDashboard(businessId, reportGranularity, customStart, customEnd).then(setStats).catch(console.error);
+            } else if (reportGranularity !== 'custom') {
+                getAiDashboard(businessId, reportGranularity).then(setStats).catch(console.error);
+            }
         }
-    }, [businessId, reportGranularity]);
+    }, [businessId, reportGranularity, customStart, customEnd]);
 
     //   if (!businessId) {
     //     navigate("/my-businesses");
@@ -92,8 +99,8 @@ function Dashboard({ businessId: propBusinessId, theme }) {
     //   }
 
     const isDark = theme === 'dark';
-    const textColor = isDark ? '#94a3b8' : '#475569';
-    const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+    const textColor = isDark ? '#cbd5e1' : '#475569';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
 
     // --- CHART DATA CONFIG ---
     const chartData = {
@@ -102,20 +109,26 @@ function Dashboard({ businessId: propBusinessId, theme }) {
             {
                 label: 'Revenue',
                 data: stats.weekly_analysis ? stats.weekly_analysis.map(w => w.revenue) : [],
-                backgroundColor: '#73C2FB', // Blue
-                borderRadius: 4,
+                backgroundColor: isDark ? '#60a5fa' : '#3b82f6',
+                borderColor: isDark ? '#93c5fd' : '#2563eb',
+                borderWidth: 1,
+                borderRadius: 6,
             },
             {
                 label: 'Expenses',
                 data: stats.weekly_analysis ? stats.weekly_analysis.map(w => w.expenses) : [],
-                backgroundColor: '#FF8D9E', // Pink
-                borderRadius: 4,
+                backgroundColor: isDark ? '#fb7185' : '#f43f5e',
+                borderColor: isDark ? '#fda4af' : '#e11d48',
+                borderWidth: 1,
+                borderRadius: 6,
             },
             {
                 label: 'Profit',
                 data: stats.weekly_analysis ? stats.weekly_analysis.map(w => w.profit) : [],
-                backgroundColor: '#7CD1C4', // Teal
-                borderRadius: 4,
+                backgroundColor: isDark ? '#34d399' : '#10b981',
+                borderColor: isDark ? '#6ee7b7' : '#059669',
+                borderWidth: 1,
+                borderRadius: 6,
             }
         ]
     };
@@ -124,11 +137,11 @@ function Dashboard({ businessId: propBusinessId, theme }) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { position: 'top', labels: { usePointStyle: true, font: { size: 10 }, color: textColor } }
+            legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11, weight: 'bold' }, color: textColor, padding: 16 } }
         },
         scales: {
-            x: { grid: { display: false }, ticks: { color: textColor } },
-            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }
+            x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } },
+            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 }, callback: (v) => '₹' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v) } }
         }
     };
 
@@ -136,8 +149,11 @@ function Dashboard({ businessId: propBusinessId, theme }) {
         labels: stats.expense_breakdown ? stats.expense_breakdown.map(e => e.category) : [],
         datasets: [{
             data: stats.expense_breakdown ? stats.expense_breakdown.map(e => e.amount) : [],
-            backgroundColor: ['#73C2FB', '#FF8D9E', '#7CD1C4', '#FBBF24', '#8B5CF6', '#EC4899', '#10B981'],
-            borderWidth: 0,
+            backgroundColor: isDark
+                ? ['#60a5fa', '#fb7185', '#34d399', '#fbbf24', '#a78bfa', '#f472b6', '#2dd4bf', '#fb923c', '#818cf8']
+                : ['#3b82f6', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1'],
+            borderColor: isDark ? '#1e293b' : '#ffffff',
+            borderWidth: 2,
         }]
     };
 
@@ -146,12 +162,15 @@ function Dashboard({ businessId: propBusinessId, theme }) {
         datasets: [{
             label: 'Net Profit',
             data: stats.monthly_profit_trend ? stats.monthly_profit_trend.map(m => m.profit) : [],
-            borderColor: '#10B981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderColor: isDark ? '#34d399' : '#10B981',
+            backgroundColor: isDark ? 'rgba(52, 211, 153, 0.15)' : 'rgba(16, 185, 129, 0.12)',
             fill: true,
             tension: 0.4,
-            pointRadius: 4,
-            borderWidth: 5,
+            pointRadius: 5,
+            pointBackgroundColor: isDark ? '#34d399' : '#10B981',
+            pointBorderColor: isDark ? '#1e293b' : '#fff',
+            pointBorderWidth: 2,
+            borderWidth: 3,
         }]
     };
 
@@ -282,41 +301,228 @@ function Dashboard({ businessId: propBusinessId, theme }) {
             </div>
 
             {/* REPORT GRANULARITY SELECTOR */}
-            <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
-                <div>
-                    <h2 className="text-xl font-serif font-bold text-slate-900 dark:text-white">Report Frequency</h2>
-                    <p className="text-slate-500 dark:text-slate-400 text-xs">Switch between daily, weekly, and monthly performance views.</p>
+            <div className="mb-10 no-print">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                    <div>
+                        <h2 className="text-xl font-serif font-bold text-slate-900 dark:text-white">Report Frequency</h2>
+                        <p className="text-slate-500 dark:text-slate-400 text-xs">Select a time range for your performance analytics.</p>
+                    </div>
                 </div>
-                <div className="bg-slate-100 dark:bg-white/5 p-1.5 rounded-[20px] shadow-sm border border-slate-200 dark:border-white/10 flex gap-1">
-                    {['daily', 'weekly', 'monthly'].map((g) => (
+                <div className="bg-slate-100 dark:bg-white/5 p-1.5 rounded-[20px] shadow-sm border border-slate-200 dark:border-white/10 flex flex-wrap gap-1">
+                    {[
+                        { key: 'daily', label: 'Daily' },
+                        { key: 'weekly', label: 'Weekly' },
+                        { key: 'monthly', label: 'Monthly' },
+                        { key: 'quarterly', label: 'Quarterly' },
+                        { key: 'halfyearly', label: 'Half-Year' },
+                        { key: 'yearly', label: 'Yearly' },
+                        { key: 'custom', label: '📅 Custom' },
+                    ].map((g) => (
                         <button
-                            key={g}
-                            onClick={() => setReportGranularity(g)}
-                            className={`px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${reportGranularity === g
+                            key={g.key}
+                            onClick={() => setReportGranularity(g.key)}
+                            className={`px-4 md:px-5 py-2 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${reportGranularity === g.key
                                 ? 'bg-primary-500 text-white shadow-xl shadow-primary-500/20 scale-105'
                                 : 'text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-500 hover:bg-primary-500/10 dark:hover:bg-primary-500/5'
                                 }`}
                         >
-                            {g}
+                            {g.label}
                         </button>
                     ))}
                 </div>
+
+                {/* Custom Date Range Pickers */}
+                {reportGranularity === 'custom' && (
+                    <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-white/60 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
+                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 flex-shrink-0">From</span>
+                        <input
+                            type="date"
+                            value={customStart}
+                            onChange={(e) => setCustomStart(e.target.value)}
+                            className="px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none w-full sm:w-auto"
+                        />
+                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 flex-shrink-0">To</span>
+                        <input
+                            type="date"
+                            value={customEnd}
+                            onChange={(e) => setCustomEnd(e.target.value)}
+                            className="px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none w-full sm:w-auto"
+                        />
+                        {(!customStart || !customEnd) && (
+                            <span className="text-[10px] text-amber-500 dark:text-amber-400 font-bold ml-1">⚠ Select both dates</span>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* TOP LEVEL STATS */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <StatCard title="Total Revenue" value={`₹${stats.total_sales.toLocaleString()}`} icon="💰" color="text-emerald-500" />
+                <StatCard title="Total Revenue" value={formatINR(stats.total_sales)} icon="💰" color="text-emerald-500" />
                 <StatCard
                     title="Gross Profit"
-                    value={`₹${stats.gross_profit.toLocaleString()}`}
+                    value={formatINR(stats.gross_profit)}
                     icon="⚖️"
                     color="text-sky-500"
-                    subValue={<span className="text-[10px] text-slate-400">COGS: ₹{stats.total_cogs.toLocaleString()}</span>}
+                    subValue={
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] font-bold border border-amber-200 dark:border-amber-500/30">
+                            💲 COGS: {formatINR(stats.total_cogs)}
+                        </span>
+                    }
                 />
-                <StatCard title="Op. Expenses" value={`₹${stats.total_expenses.toLocaleString()}`} icon="💸" color="text-rose-500" />
-                <StatCard title="Net Profit" value={`₹${stats.net_profit.toLocaleString()}`} icon="📈" color="text-indigo-500" />
+                <StatCard title="Op. Expenses" value={formatINR(stats.total_expenses)} icon="💸" color="text-rose-500" />
+                <StatCard title="Net Profit" value={formatINR(stats.net_profit)} icon="📈" color="text-indigo-500" />
             </div>
 
+            {/* WEEKLY PERFORMANCE ANALYTICS - Premium Card */}
+            <div className="bg-white/65 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 backdrop-blur-[12px] p-8 md:p-12 rounded-[2.5rem] shadow-2xl shadow-black/5 w-full mb-8 relative overflow-hidden group">
+                {/* Background Glows */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[100px] -mr-32 -mt-32"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 blur-[100px] -ml-32 -mb-32"></div>
+
+                <div className="relative z-10">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                        <div>
+                            <div className="flex items-center space-x-3 mb-3">
+                                <span className="text-primary-400 text-[10px] font-black uppercase tracking-[0.3em]">📡 Operational Intelligence</span>
+                            </div>
+                            <h3 className="text-3xl md:text-4xl font-serif text-slate-900 dark:text-white tracking-tight leading-tight">Weekly Performance Analytics</h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-medium">Financial health overview for the current billing cycle.</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="bg-slate-100/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-5 py-3 rounded-2xl flex items-center space-x-3">
+                                <span className="text-indigo-500 text-lg">🎯</span>
+                                <div className="flex flex-col">
+                                    <span className="text-slate-800 dark:text-white font-bold text-sm">
+                                        {stats.net_profit > 0 ? Math.min(100, Math.round((stats.net_profit / Math.max(1, stats.total_sales)) * 100 * 3)) : 0}%
+                                    </span>
+                                    <span className="text-slate-500 text-[9px] uppercase font-bold tracking-widest">Goal Status</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Stat Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-10">
+                        {[
+                            {
+                                label: 'Total Revenue',
+                                value: formatINR(stats.total_sales),
+                                change: m.growth.sales >= 0 ? `+${m.growth.sales.toFixed(1)}%` : `${m.growth.sales.toFixed(1)}%`,
+                                trend: m.growth.sales >= 0 ? 'up' : 'down'
+                            },
+                            {
+                                label: 'Net Profit',
+                                value: formatINR(stats.net_profit),
+                                change: m.growth.profit >= 0 ? `+${m.growth.profit.toFixed(1)}%` : `${m.growth.profit.toFixed(1)}%`,
+                                trend: m.growth.profit >= 0 ? 'up' : 'down'
+                            },
+                            {
+                                label: 'Op. Expenses',
+                                value: formatINR(stats.total_expenses),
+                                change: stats.total_expenses > 0 ? `-${((stats.total_expenses / Math.max(1, stats.total_sales)) * 100).toFixed(1)}%` : '0%',
+                                trend: 'down'
+                            },
+                            {
+                                label: 'Profit Margin',
+                                value: stats.total_sales > 0 ? `${((stats.net_profit / stats.total_sales) * 100).toFixed(1)}%` : '0%',
+                                change: m.growth.profit >= 0 ? `+${m.growth.profit.toFixed(1)}%` : `${m.growth.profit.toFixed(1)}%`,
+                                trend: m.growth.profit >= 0 ? 'up' : 'down'
+                            }
+                        ].map((stat, i) => (
+                            <div key={i} className="bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 p-5 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-widest">{stat.label}</span>
+                                    <span className={`text-[11px] font-black ${stat.trend === 'up' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                        {stat.trend === 'up' ? '↑' : '↓'} {stat.change}
+                                    </span>
+                                </div>
+                                <p className="text-2xl font-serif text-slate-900 dark:text-white font-bold">{stat.value}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Line Chart */}
+                    <div className="relative h-[350px] w-full bg-white/30 dark:bg-white/[0.02] rounded-2xl p-6 border border-slate-200/50 dark:border-white/10 shadow-inner">
+                        <div className="absolute top-6 left-6 flex items-center space-x-6 z-10">
+                            <div className="flex items-center space-x-2">
+                                <div className="w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>
+                                <span className="text-slate-700 dark:text-slate-300 text-[10px] font-black uppercase tracking-widest">Revenue</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                                <span className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest">Profit</span>
+                            </div>
+                        </div>
+                        <Line
+                            data={{
+                                labels: stats.weekly_analysis ? stats.weekly_analysis.map(w => w.label) : [],
+                                datasets: [
+                                    {
+                                        label: 'Revenue',
+                                        data: stats.weekly_analysis ? stats.weekly_analysis.map(w => w.revenue) : [],
+                                        borderColor: '#6366f1',
+                                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointRadius: 4,
+                                        pointBackgroundColor: '#6366f1',
+                                        pointBorderColor: isDark ? '#1e293b' : '#fff',
+                                        pointBorderWidth: 2,
+                                        borderWidth: 3,
+                                    },
+                                    {
+                                        label: 'Profit',
+                                        data: stats.weekly_analysis ? stats.weekly_analysis.map(w => w.profit) : [],
+                                        borderColor: '#10b981',
+                                        backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointRadius: 4,
+                                        pointBackgroundColor: '#10b981',
+                                        pointBorderColor: isDark ? '#1e293b' : '#fff',
+                                        pointBorderWidth: 2,
+                                        borderWidth: 3,
+                                        borderDash: [5, 5],
+                                    }
+                                ],
+                            }}
+                            options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        backgroundColor: isDark ? '#1e293b' : '#fff',
+                                        titleColor: isDark ? '#f8fafc' : '#0f172a',
+                                        bodyColor: isDark ? '#94a3b8' : '#475569',
+                                        borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0,0,0,0.1)',
+                                        borderWidth: 1,
+                                        padding: 12,
+                                        displayColors: true,
+                                        callbacks: {
+                                            label: (context) => ` ${context.dataset.label}: ${formatINR(context.parsed.y)}`
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        grid: { color: gridColor, drawBorder: false },
+                                        ticks: {
+                                            color: textColor,
+                                            font: { size: 10 },
+                                            callback: (value) => '₹' + (value >= 1000 ? (value / 1000).toFixed(0) + 'k' : value)
+                                        }
+                                    },
+                                    x: {
+                                        grid: { display: false },
+                                        ticks: { color: textColor, font: { size: 10 } }
+                                    },
+                                },
+                            }}
+                        />
+                    </div>
+                </div>
+            </div>
             {/* MAIN ANALYSIS BLOCK */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 {/* WEEKLY ANALYSIS (2/3 width) */}
@@ -340,7 +546,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                             <div>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Sales This Month</p>
                                 <div className="flex items-end gap-2">
-                                    <span className="text-2xl font-bold text-slate-900 dark:text-white">₹{m.this_month.sales.toLocaleString()}</span>
+                                    <span className="text-2xl font-bold text-slate-900 dark:text-white">{formatINR(m.this_month.sales)}</span>
                                     <span className={`text-xs font-bold ${m.growth.sales >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                                         {m.growth.sales >= 0 ? '↑' : '↓'} {Math.abs(m.growth.sales).toFixed(1)}%
                                     </span>
@@ -350,7 +556,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                             <div>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Net Profit This Month</p>
                                 <div className="flex items-end gap-2">
-                                    <span className="text-2xl font-bold text-slate-900 dark:text-white">₹{m.this_month.profit.toLocaleString()}</span>
+                                    <span className="text-2xl font-bold text-slate-900 dark:text-white">{formatINR(m.this_month.profit)}</span>
                                     <span className={`text-xs font-bold ${m.growth.profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                                         {m.growth.profit >= 0 ? '↑' : '↓'} {Math.abs(m.growth.profit).toFixed(1)}%
                                     </span>
@@ -364,7 +570,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                             <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl">🤖</div>
                             <div>
                                 <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Forecast Expense</p>
-                                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">₹{stats.prediction.expense_forecast?.toLocaleString() || 0}</p>
+                                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{formatINR(stats.prediction.expense_forecast || 0)}</p>
                             </div>
                         </div>
                     </div>
@@ -423,7 +629,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                                     <p className="text-2xl font-serif font-bold">
                                         {stats.expense_breakdown.length > 0 ? [...stats.expense_breakdown].sort((a, b) => b.amount - a.amount)[0].category : 'N/A'}
                                     </p>
-                                    <p className="text-xs text-indigo-200 mt-1">Consuming ₹{[...stats.expense_breakdown].sort((a, b) => b.amount - a.amount)[0].amount.toLocaleString()} this period.</p>
+                                    <p className="text-xs text-indigo-200 mt-1">Consuming {formatINR([...stats.expense_breakdown].sort((a, b) => b.amount - a.amount)[0].amount)} this period.</p>
                                 </div>
 
                                 <div className="p-4 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
@@ -451,14 +657,14 @@ function Dashboard({ businessId: propBusinessId, theme }) {
 
 function StatCard({ title, value, icon, color, subValue }) {
     return (
-        <div className="bg-white dark:bg-white/5 backdrop-blur-sm p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 hover:shadow-md transition-all group overflow-hidden relative">
+        <div className="bg-white dark:bg-white/5 backdrop-blur-sm p-5 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 hover:shadow-md transition-all group overflow-hidden relative">
             <div className="absolute top-0 right-0 w-24 h-24 bg-slate-100 dark:bg-white/5 rounded-full -mr-12 -mt-12 group-hover:bg-slate-200 dark:group-hover:bg-white/10 transition-colors"></div>
-            <div className="relative z-10 flex justify-between items-start mb-4">
+            <div className="relative z-10 flex justify-between items-start mb-3">
                 <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-widest font-sans">{title}</p>
-                <span className="text-xl p-2 bg-slate-100 dark:bg-white/5 rounded-xl group-hover:scale-110 transition-transform">{icon}</span>
+                <span className="text-lg p-1.5 bg-slate-100 dark:bg-white/5 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0">{icon}</span>
             </div>
-            <p className={`text-4xl font-serif font-black ${color} relative z-10`}>{value}</p>
-            {subValue && <div className="mt-2 flex items-center gap-1.5 opacity-80">{subValue}</div>}
+            <p className={`text-2xl md:text-3xl font-serif font-black ${color} relative z-10 truncate`}>{value}</p>
+            {subValue && <div className="mt-2 flex items-center gap-1.5">{subValue}</div>}
         </div>
     );
 }
