@@ -120,7 +120,8 @@ const ExportModal = ({ isOpen, onClose, businessId, businessName }) => {
 
             if (!response.ok) throw new Error(data.error || 'Email failed');
 
-            toast.success(`Reports sent to ${data.email}!`, { id: toastId });
+            //toast.success(`Reports sent to ${data.email}!`, { id: toastId });
+            toast.success(data.message || `Reports sent successfully!`, { id: toastId });
         } catch (err) {
             toast.error(err.message || 'Failed to send email', { id: toastId });
             console.error(err);
