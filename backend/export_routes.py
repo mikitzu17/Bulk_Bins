@@ -527,13 +527,25 @@ def email_report(business_id):
         total_expenses = sum(t.amount for t in transactions if t.type == 'Expense')
         net = total_sales - total_expenses
 
+        # Get owners for greeting
+        owners = BusinessMember.query.filter_by(business_id=business_id, role='Owner').all()
+        owner_name = "Business Owner"
+        if owners:
+            names = [o.user.username for o in owners]
+            if len(names) == 1:
+                owner_name = names[0]
+            elif len(names) == 2:
+                owner_name = f"{names[0]} & {names[1]}"
+            else:
+                owner_name = ", ".join(names[:-1]) + f" & {names[-1]}"
+
         # Build email
         fmt_str = ", ".join([f.upper() for f in formats])
         subject = f"[{business.name}] Financial Report ({fmt_str}) - {date_range}"
         body = f"""
         <html>
         <body>
-            <h3>Hi {user.username},</h3>
+            <h3>Hi {owner_name},</h3>
             <p>Here are your financial reports for <strong>{business.name}</strong>.</p>
             <div style="background: #f4f4f4; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <h4 style="margin-top: 0;">📊 Report Summary</h4>
