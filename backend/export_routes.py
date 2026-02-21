@@ -14,6 +14,7 @@ import numpy as np
 import os
 import tempfile
 from extensions import mail
+import threading
 
 
 export_bp = Blueprint("export", __name__)
@@ -558,9 +559,21 @@ The detailed reports are attached to this email.
             recipients=[recipient],
             body=body
         )
-        mail.send(msg)
+        def send_async_email(app, msg):
+            with app.app_context():
+                mail.send(msg)
 
-        
+        thread = threading.Thread(
+            target=send_async_email,
+            args=(current_app._get_current_object(), msg)
+        )
+        thread.start()
+
+        return jsonify({
+            "message": f"Report is being sent to {recipient}"
+        }), 200
+
+
         # Generate and attach files
         for fmt in formats:
             fmt = fmt.lower()
