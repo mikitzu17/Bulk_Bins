@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, UserPlus, Trash2, Shield, Settings, Mail, Coins } from 'lucide-react';
+import { Save, UserPlus, Trash2, Shield, Settings, Mail, Coins, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import CustomSelect from './CustomSelect';
@@ -7,7 +7,7 @@ import CustomSelect from './CustomSelect';
 const API_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000") + "/api";
 
 export default function StoreSettings({ businessId, theme }) {
-    const { token, currentBusiness, setCurrentBusiness } = useAuth();
+    const { token, user, updateProfile, currentBusiness, setCurrentBusiness } = useAuth();
     const [activeSection, setActiveSection] = useState('General');
     const [loading, setLoading] = useState(false);
 
@@ -15,7 +15,8 @@ export default function StoreSettings({ businessId, theme }) {
     const [settingsForm, setSettingsForm] = useState({
         name: '',
         currency: 'INR',
-        email: ''
+        email: '',
+        secondary_email: ''
     });
 
     const currencyOptions = [
@@ -31,12 +32,27 @@ export default function StoreSettings({ businessId, theme }) {
     const [members, setMembers] = useState([]);
     const [inviteForm, setInviteForm] = useState({ email: '', role: 'Staff' });
 
+    const [profileForm, setProfileForm] = useState({
+        username: '',
+        email: ''
+    });
+
+    useEffect(() => {
+        if (user) {
+            setProfileForm({
+                username: user.name || '',
+                email: user.email || ''
+            });
+        }
+    }, [user]);
+
     useEffect(() => {
         if (currentBusiness) {
             setSettingsForm({
                 name: currentBusiness.name || '',
                 currency: currentBusiness.currency || 'INR',
-                email: currentBusiness.email || ''
+                email: currentBusiness.email || '',
+                secondary_email: currentBusiness.secondary_email || ''
             });
             fetchMembers();
         }
@@ -79,6 +95,13 @@ export default function StoreSettings({ businessId, theme }) {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        const success = await updateProfile(profileForm);
+        setLoading(false);
     };
 
     const handleAddMember = async (e) => {
@@ -147,9 +170,10 @@ export default function StoreSettings({ businessId, theme }) {
     };
 
     const isDark = theme === 'dark';
+    const isOwner = currentBusiness?.role === 'Owner';
     const cardClass = `p-8 rounded-3xl ${isDark ? 'bg-slate-900/50 border border-white/5' : 'bg-white border border-slate-100'} shadow-xl transition-all duration-300`;
-    const inputClass = `w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'} focus:ring-2 focus:ring-primary-500 transition-all`;
-    const btnClass = `px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`;
+    const inputClass = `w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'} focus:ring-2 focus:ring-primary-500 transition-all ${!isOwner ? 'opacity-70 cursor-not-allowed' : ''}`;
+    const btnClass = `px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${loading || !isOwner ? 'opacity-50 cursor-not-allowed' : ''}`;
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -164,7 +188,7 @@ export default function StoreSettings({ businessId, theme }) {
 
             {/* Navigation Pills */}
             <div className="flex gap-4 p-2 rounded-2xl bg-slate-100/50 dark:bg-slate-800/50 w-fit">
-                {['General', 'Team'].map((tab) => (
+                {['General', 'Team', 'Account'].map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveSection(tab)}
@@ -192,6 +216,7 @@ export default function StoreSettings({ businessId, theme }) {
                                         onChange={(e) => setSettingsForm({ ...settingsForm, name: e.target.value })}
                                         className={`${inputClass} pl-10`}
                                         required
+                                        disabled={!isOwner}
                                     />
                                 </div>
                             </div>
@@ -205,12 +230,13 @@ export default function StoreSettings({ businessId, theme }) {
                                         onChange={(e) => setSettingsForm({ ...settingsForm, currency: e.target.value })}
                                         options={currencyOptions}
                                         buttonClassName="pl-12"
+                                        disabled={!isOwner}
                                     />
                                 </div>
                             </div>
 
                             <div className="col-span-1 md:col-span-2 space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Contact Email</label>
+                                <label className="text-sm font-medium text-slate-400">Primary Contact Email</label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
                                     <input
@@ -218,7 +244,23 @@ export default function StoreSettings({ businessId, theme }) {
                                         value={settingsForm.email}
                                         onChange={(e) => setSettingsForm({ ...settingsForm, email: e.target.value })}
                                         className={`${inputClass} pl-10`}
-                                        placeholder="contact@store.com"
+                                        placeholder="primary@store.com"
+                                        disabled={!isOwner}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="col-span-1 md:col-span-2 space-y-2">
+                                <label className="text-sm font-medium text-slate-400">Secondary Contact Email</label>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                                    <input
+                                        type="email"
+                                        value={settingsForm.secondary_email}
+                                        onChange={(e) => setSettingsForm({ ...settingsForm, secondary_email: e.target.value })}
+                                        className={`${inputClass} pl-10`}
+                                        placeholder="secondary@store.com"
+                                        disabled={!isOwner}
                                     />
                                 </div>
                             </div>
@@ -227,12 +269,15 @@ export default function StoreSettings({ businessId, theme }) {
                         <div className="pt-4">
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={loading || !isOwner}
                                 className={`${btnClass} bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/20`}
                             >
                                 <Save className="w-5 h-5" />
                                 {loading ? 'Saving...' : 'Save Changes'}
                             </button>
+                            {!isOwner && (
+                                <p className="mt-2 text-xs text-amber-500 font-medium">Only owners can modify business settings.</p>
+                            )}
                         </div>
                     </form>
                 </div>
@@ -320,6 +365,62 @@ export default function StoreSettings({ businessId, theme }) {
                             ))}
                         </div>
                     </div>
+                </div>
+            )}
+
+            {activeSection === 'Account' && (
+                <div className={cardClass}>
+                    <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-900 dark:text-white">
+                        <User className="w-6 h-6 text-primary-400" />
+                        Personal Account Settings
+                    </h3>
+                    <form onSubmit={handleUpdateProfile} className="space-y-6 max-w-2xl">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-400">Full Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        value={profileForm.username}
+                                        onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
+                                        className={`${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'} w-full px-4 py-3 rounded-xl border pl-10 focus:ring-2 focus:ring-primary-500 transition-all`}
+                                        placeholder="Your full name"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-400">Personal Registered Email</label>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                                    <input
+                                        type="email"
+                                        value={profileForm.email}
+                                        onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                                        className={`${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'} w-full px-4 py-3 rounded-xl border pl-10 focus:ring-2 focus:ring-primary-500 transition-all`}
+                                        placeholder="personal@email.com"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-4">
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/20 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                <Save className="w-5 h-5" />
+                                {loading ? 'Updating Profile...' : 'Update Account'}
+                            </button>
+                            <p className="mt-4 text-xs text-slate-400 italic">
+                                Note: Changing your email will require you to log in with the new email next time.
+                            </p>
+                        </div>
+                    </form>
                 </div>
             )}
         </div>

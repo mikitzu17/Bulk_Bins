@@ -17,7 +17,18 @@ def update_schema():
             conn.commit()
             print("Schema updated successfully.")
         else:
-            print("Column is_master_admin already exists.")
+            print("Column is_master_admin already exists in User table.")
+
+        # Update business table
+        cursor.execute("PRAGMA table_info(business)")
+        columns = [info[1] for info in cursor.fetchall()]
+        if 'secondary_email' not in columns:
+            print("Adding secondary_email column to Business table...")
+            cursor.execute("ALTER TABLE business ADD COLUMN secondary_email VARCHAR(120)")
+            conn.commit()
+            print("Business table updated successfully.")
+        else:
+            print("Column secondary_email already exists in Business table.")
             
     except Exception as e:
         print(f"Error updating schema: {e}")

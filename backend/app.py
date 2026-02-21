@@ -9,8 +9,7 @@ from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from functools import wraps
-#from flask_mail import Mail
-from extensions import mail
+
 
 
 
@@ -25,8 +24,7 @@ if os.path.exists(env_path):
 else:
     print("DEBUG: .env file NOT found at this path.")
 
-print(f"DEBUG: MAIL_SERVER set to: {os.environ.get('MAIL_SERVER')}")
-print(f"DEBUG: MAIL_USERNAME set to: {os.environ.get('MAIL_USERNAME', 'NOT_SET')}")
+
 
 
 app = Flask(__name__)
@@ -49,17 +47,7 @@ def create_tables():
 
 create_tables()
 
-# Flask-Mail Configuration
-from flask_mail import Mail
-app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 465))
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '')
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '')
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', app.config['MAIL_USERNAME'])
-#mail = Mail(app)
-mail.init_app(app)
+
 
 from ai_insights import ai_bp
 from ai_service import ai_service
@@ -165,6 +153,44 @@ def verify():
             "businesses": biz_list
         }), 200
     return jsonify({"message": "User not found"}), 404
+
+@app.route('/api/user/profile', methods=['PUT'])
+@jwt_required()
+def update_profile():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    data = request.get_json()
+    new_username = data.get('username')
+    new_email = data.get('email')
+    
+    if new_username:
+        user.username = new_username
+    
+    email_changed = False
+    if new_email and new_email != user.email:
+        if User.query.filter_by(email=new_email).first():
+            return jsonify({"message": "Email already registered by another user"}), 400
+        user.email = new_email
+        email_changed = True
+        
+    db.session.commit()
+    
+    response = {
+        "message": "Profile updated successfully",
+        "user": {
+            "email": user.email,
+            "name": user.username,
+            "is_master_admin": user.is_master_admin
+        }
+    }
+    
+    if email_changed:
+        response["token"] = create_access_token(identity=user.email)
+        
+    return jsonify(response), 200
 
 # Master Admin Routes
 @app.route('/api/admin/overview', methods=['GET'])
@@ -288,7 +314,12 @@ def create_business():
     current_user_email = get_jwt_identity()
     user = User.query.filter_by(email=current_user_email).first()
     
-    new_biz = Business(name=data.get('name'), status='pending')
+    new_biz = Business(
+        name=data.get('name'), 
+        email=data.get('email'),
+        secondary_email=data.get('secondary_email'),
+        status='pending'
+    )
     db.session.add(new_biz)
     db.session.flush() # Get ID before commit
     
@@ -347,8 +378,8 @@ def manage_business(business_id):
         return jsonify({"message": "Business deleted successfully"}), 200
 
     if request.method == 'PUT':
-        if membership.role not in ['Owner', 'Accountant']:
-             return jsonify({"message": "Access denied"}), 403
+        if membership.role != 'Owner':
+             return jsonify({"message": "Only Owners can update business settings"}), 403
         
         data = request.get_json()
         biz = Business.query.get(business_id)
@@ -357,9 +388,14 @@ def manage_business(business_id):
         biz.name = data.get('name', biz.name)
         biz.currency = data.get('currency', biz.currency)
         biz.email = data.get('email', biz.email)
+        biz.secondary_email = data.get('secondary_email', biz.secondary_email)
         
         db.session.commit()
-        return jsonify({"message": "Business settings updated", "currency": biz.currency}), 200
+        return jsonify({
+            "message": "Business settings updated", 
+            "currency": biz.currency,
+            "secondary_email": biz.secondary_email
+        }), 200
 
 @app.route('/api/businesses/<int:business_id>/members', methods=['GET'])
 @role_required(['Owner', 'Accountant', 'Analyst', 'Staff'])

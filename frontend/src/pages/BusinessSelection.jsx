@@ -7,19 +7,23 @@ import Logo from '../assets/logo.png';
 
 const BusinessSelection = () => {
     const { businesses, createBusiness, deleteBusiness, logout, user, setCurrentBusiness } = useAuth();
-    const [newBusinessName, setNewBusinessName] = useState('');
+    const [newBusiness, setNewBusiness] = useState({ name: '', email: '', secondaryEmail: '' });
     const [isCreating, setIsCreating] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleCreate = async (e) => {
         e.preventDefault();
-        if (newBusinessName.trim()) {
+        if (newBusiness.name.trim()) {
             setLoading(true);
-            const biz = await createBusiness(newBusinessName);
+            const biz = await createBusiness({
+                name: newBusiness.name,
+                email: newBusiness.email,
+                secondary_email: newBusiness.secondaryEmail
+            });
             setLoading(false);
             if (biz) {
-                setNewBusinessName('');
+                setNewBusiness({ name: '', email: '', secondaryEmail: '' });
                 setIsCreating(false);
                 // Don't navigate if pending approval
                 if (!biz.status || biz.status === 'approved') {
@@ -149,10 +153,24 @@ const BusinessSelection = () => {
                                             autoFocus
                                             type="text"
                                             placeholder="Business Name"
-                                            value={newBusinessName}
-                                            onChange={(e) => setNewBusinessName(e.target.value)}
+                                            value={newBusiness.name}
+                                            onChange={(e) => setNewBusiness({ ...newBusiness, name: e.target.value })}
                                             className="w-full bg-slate-950 border border-white/10 rounded-2xl py-4 px-6 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary-500/50 transition-all mb-4 font-medium"
                                             required
+                                        />
+                                        <input
+                                            type="email"
+                                            placeholder="Primary Email"
+                                            value={newBusiness.email}
+                                            onChange={(e) => setNewBusiness({ ...newBusiness, email: e.target.value })}
+                                            className="w-full bg-slate-950 border border-white/10 rounded-2xl py-4 px-6 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary-500/50 transition-all mb-4 font-medium"
+                                        />
+                                        <input
+                                            type="email"
+                                            placeholder="Secondary Email (Optional)"
+                                            value={newBusiness.secondaryEmail}
+                                            onChange={(e) => setNewBusiness({ ...newBusiness, secondaryEmail: e.target.value })}
+                                            className="w-full bg-slate-950 border border-white/10 rounded-2xl py-4 px-6 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary-500/50 transition-all mb-4 font-medium"
                                         />
                                     </div>
                                     <div className="flex gap-4">
@@ -165,7 +183,10 @@ const BusinessSelection = () => {
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => setIsCreating(false)}
+                                            onClick={() => {
+                                                setIsCreating(false);
+                                                setNewBusiness({ name: '', email: '', secondaryEmail: '' });
+                                            }}
                                             className="bg-white/5 text-slate-400 px-6 rounded-2xl text-lg uppercase tracking-widest hover:bg-white/10 transition-colors font-medium"
                                         >
                                             Cancel

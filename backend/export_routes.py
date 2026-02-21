@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import tempfile
-from extensions import mail
+from gmail_util import send_gmail
+import base64
 import threading
 
 
@@ -497,11 +498,6 @@ def export_transactions(business_id):
 @export_bp.route("/businesses/<int:business_id>/export/email", methods=["POST"])
 def email_report(business_id):
     try:
-        from flask_mail import Message as MailMessage
-        
-        if not mail:
-            return jsonify({"error": "Email service not configured"}), 500
-
         user_id, _ = _get_auth(request)
         if not user_id:
             return jsonify({"error": "Unauthorized"}), 401
@@ -520,8 +516,8 @@ def email_report(business_id):
         business = Business.query.get(business_id)
         user = User.query.get(user_id)
 
-        # Use the logged-in user's email
-        recipient = user.email
+        # Priority: Business Primary Email -> Registered User Email
+        recipient = business.email if business.email else user.email
 
         date_range = "All Time"
         if start_date and end_date:
@@ -534,79 +530,63 @@ def email_report(business_id):
         # Build email
         fmt_str = ", ".join([f.upper() for f in formats])
         subject = f"[{business.name}] Financial Report ({fmt_str}) - {date_range}"
-        body = f"""Hi {user.username},
+        body = f"""
+        <html>
+        <body>
+            <h3>Hi {user.username},</h3>
+            <p>Here are your financial reports for <strong>{business.name}</strong>.</p>
+            <div style="background: #f4f4f4; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <h4 style="margin-top: 0;">📊 Report Summary</h4>
+                <p><strong>Period:</strong> {date_range}</p>
+                <p><strong>Formats:</strong> {fmt_str}</p>
+                <p><strong>Total Sales:</strong> Rs. {total_sales:,.2f}</p>
+                <p><strong>Total Expenses:</strong> Rs. {total_expenses:,.2f}</p>
+                <p style="font-size: 1.1em;"><strong>Net Profit:</strong> Rs. {net:,.2f}</p>
+                <p><strong>Transactions:</strong> {len(transactions)}</p>
+            </div>
+            <p>Exported by: {user.username} ({user.email})</p>
+            <p>The detailed reports are attached to this email.</p>
+            <br>
+            <p>— BulkBins</p>
+        </body>
+        </html>
+        """
 
-Here are your financial reports for {business.name}.
-
-📊 Report Summary
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Period: {date_range}
-Formats: {fmt_str}
-Total Sales: Rs. {total_sales:,.2f}
-Total Expenses: Rs. {total_expenses:,.2f}
-Net Profit: Rs. {net:,.2f}
-Transactions: {len(transactions)}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Exported by: {user.username} ({user.email})
-
-The detailed reports are attached to this email.
-
-— BulkBins"""
-
-        msg = MailMessage(
-            subject=subject,
-            recipients=[recipient],
-            body=body
-        )
-        def send_async_email(app, msg):
-            with app.app_context():
-                mail.send(msg)
-
-        def send_async_email(app, msg):
-            with app.app_context():
-                mail.send(msg)
-
-        thread = threading.Thread(
-            target=send_async_email,
-            args=(current_app._get_current_object(), msg)
-        )
-        thread.start()
-
-        return jsonify({
-            "success": True,
-            "message": f"Report is being sent to {recipient}",
-    "email": recipient
-}), 200
-
-
-        # Generate and attach files
+        # Generate attachments
+        gmail_attachments = []
         for fmt in formats:
             fmt = fmt.lower()
             if fmt == 'csv':
                 file_data = _build_csv(transactions)
                 filename = f'{business.name}_transactions.csv'
-                mimetype = 'text/csv'
             elif fmt == 'excel':
                 file_data = _build_excel(transactions, business.name, start_date, end_date)
                 filename = f'{business.name}_report.xlsx'
-                mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             else: # pdf or others
                 file_data = _build_pdf(transactions, business, user, start_date, end_date)
                 filename = f'{business.name}_report.pdf'
-                mimetype = 'application/pdf'
 
-            msg.attach(filename, mimetype, file_data)
+            gmail_attachments.append({
+                "filename": filename,
+                "content": file_data # Raw bytes
+            })
 
-        mail.send(msg)
+        def send_email_task(recipient, subject, body, attachments):
+            try:
+                send_gmail(recipient, subject, body, attachments)
+            except Exception as e:
+                print(f"❌ ASYNC EMAIL ERROR: {str(e)}")
+
+        # Send asynchronously to avoid blocking the request
+        thread = threading.Thread(target=send_email_task, args=(recipient, subject, body, gmail_attachments))
+        thread.start()
 
         return jsonify({
-            "message": f"Report sent successfully to {recipient}",
+            "success": True,
+            "message": f"Report is being sent to {recipient}",
             "email": recipient
         }), 200
 
-    except ImportError:
-        return jsonify({"error": "Flask-Mail not installed"}), 500
     except Exception as e:
         print(f"❌ EMAIL ERROR: {str(e)}")
         import traceback

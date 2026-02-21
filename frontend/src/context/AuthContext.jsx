@@ -103,7 +103,7 @@ export const AuthProvider = ({ children }) => {
         if (showToast) toast.success('Logged out successfully');
     };
 
-    const createBusiness = async (name) => {
+    const createBusiness = async (businessData) => {
         try {
             const response = await fetch(`${API_URL}/businesses`, {
                 method: 'POST',
@@ -111,14 +111,14 @@ export const AuthProvider = ({ children }) => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ name })
+                body: JSON.stringify(businessData)
             });
 
             const data = await response.json();
 
             if (response.ok) {
                 setBusinesses([...businesses, data]);
-                toast.success(`Business "${name}" registered! Awaiting admin approval.`);
+                toast.success(`Business "${businessData.name}" registered! Awaiting admin approval.`);
                 return data;
             } else {
                 toast.error(data.message || 'Failed to create business');
@@ -127,6 +127,37 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             toast.error('Business creation failed.');
             return null;
+        }
+    };
+
+    const updateProfile = async (profileData) => {
+        try {
+            const response = await fetch(`${API_URL}/user/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(profileData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setUser(data.user);
+                if (data.token) {
+                    setToken(data.token);
+                    localStorage.setItem('token', data.token);
+                }
+                toast.success('Profile updated successfully');
+                return true;
+            } else {
+                toast.error(data.message || 'Failed to update profile');
+                return false;
+            }
+        } catch (error) {
+            toast.error('Profile update failed.');
+            return false;
         }
     };
 
@@ -148,7 +179,8 @@ export const AuthProvider = ({ children }) => {
             currentBusiness,
             setCurrentBusiness,
             createBusiness,
-            deleteBusiness
+            deleteBusiness,
+            updateProfile
         }}>
             {children}
         </AuthContext.Provider>

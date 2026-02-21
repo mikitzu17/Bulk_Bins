@@ -30,3 +30,7 @@ Thumbs.db
 # PDF/Reports
 *.pdf
 backend/uploads/
+
+# Secrets
+backend/client_secret.json
+backend/token.json

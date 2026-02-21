@@ -28,6 +28,7 @@ class Business(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     currency = db.Column(db.String(10), default='INR')
     email = db.Column(db.String(120), nullable=True)
+    secondary_email = db.Column(db.String(120), nullable=True)
     status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
     
     # Relationships
