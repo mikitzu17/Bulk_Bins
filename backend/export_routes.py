@@ -563,6 +563,10 @@ The detailed reports are attached to this email.
             with app.app_context():
                 mail.send(msg)
 
+        def send_async_email(app, msg):
+            with app.app_context():
+                mail.send(msg)
+
         thread = threading.Thread(
             target=send_async_email,
             args=(current_app._get_current_object(), msg)
@@ -570,8 +574,10 @@ The detailed reports are attached to this email.
         thread.start()
 
         return jsonify({
-            "message": f"Report is being sent to {recipient}"
-        }), 200
+            "success": True,
+            "message": f"Report is being sent to {recipient}",
+    "email": recipient
+}), 200
 
 
         # Generate and attach files
