@@ -79,6 +79,7 @@ def send_gmail(recipient, subject, body_html, attachments=None):
         message = MIMEMultipart()
         message['to'] = recipient
         message['subject'] = subject
+        message["from"] = "BulkBins Reports <monica3214b@gmail.com>" # To update email sender name
         
         # Add HTML body
         msg_html = MIMEText(body_html, 'html')
