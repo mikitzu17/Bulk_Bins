@@ -34,3 +34,10 @@ backend/uploads/
 # Secrets
 backend/client_secret.json
 backend/token.json
+.env
+.env.production
+backend/.env
+backend/.env.production
+client_secret.json
+token.json
+token.pickle
