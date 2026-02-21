@@ -16,7 +16,7 @@ __pycache__/
 .Python
 
 # DB
-*.db
+#*.db
 *.sqlite3
 
 # OS

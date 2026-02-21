@@ -5,18 +5,29 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from models import db, User, Business, BusinessMember, Transaction, InventoryItem
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from functools import wraps
 
+basedir = os.path.abspath(os.path.dirname(__file__))
+env_path = os.path.join(basedir, '.env')
+load_dotenv(env_path)
+
+# Verify Environment Loading (Safe for Production)
+print(f"DEBUG: Loading .env from {env_path}")
+if os.path.exists(env_path):
+    print("DEBUG: .env file found.")
+else:
+    print("DEBUG: .env file NOT found at this path.")
+
+print(f"DEBUG: MAIL_SERVER set to: {os.environ.get('MAIL_SERVER')}")
+print(f"DEBUG: MAIL_USERNAME set to: {os.environ.get('MAIL_USERNAME', 'NOT_SET')}")
+
 
 app = Flask(__name__)
 application = app
 
-basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'bulkbins.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'bulkbins-premium-key-2026'
