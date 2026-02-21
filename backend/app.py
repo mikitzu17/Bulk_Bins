@@ -9,6 +9,10 @@ from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from functools import wraps
+#from flask_mail import Mail
+from extensions import mail
+
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 env_path = os.path.join(basedir, '.env')
@@ -53,7 +57,8 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', app.config['MAIL_USERNAME'])
-mail = Mail(app)
+#mail = Mail(app)
+mail.init_app(app)
 
 from ai_insights import ai_bp
 from ai_service import ai_service

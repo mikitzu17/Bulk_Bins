@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import tempfile
+from extensions import mail
+
 
 export_bp = Blueprint("export", __name__)
 
@@ -495,7 +497,7 @@ def export_transactions(business_id):
 def email_report(business_id):
     try:
         from flask_mail import Message as MailMessage
-        mail = current_app.extensions.get('mail')
+        
         if not mail:
             return jsonify({"error": "Email service not configured"}), 500
 
@@ -556,7 +558,9 @@ The detailed reports are attached to this email.
             recipients=[recipient],
             body=body
         )
+        mail.send(msg)
 
+        
         # Generate and attach files
         for fmt in formats:
             fmt = fmt.lower()
