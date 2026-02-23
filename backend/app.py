@@ -389,12 +389,14 @@ def manage_business(business_id):
         biz.currency = data.get('currency', biz.currency)
         biz.email = data.get('email', biz.email)
         biz.secondary_email = data.get('secondary_email', biz.secondary_email)
+        biz.logo_url = data.get('logo_url', biz.logo_url)
         
         db.session.commit()
         return jsonify({
             "message": "Business settings updated", 
             "currency": biz.currency,
-            "secondary_email": biz.secondary_email
+            "secondary_email": biz.secondary_email,
+            "logo_url": biz.logo_url
         }), 200
 
 @app.route('/api/businesses/<int:business_id>/members', methods=['GET'])
@@ -584,7 +586,8 @@ def create_transaction(business_id):
         except: return default
 
     amount = safe_float(data.get('amount'), 0.0)
-    txn_type = data.get('type') # Sale or Expense
+    raw_type = data.get('type', 'Sale')
+    txn_type = raw_type.capitalize() # Normalize to 'Sale' or 'Expense'
     inventory_item_id = data.get('inventory_item_id')
     quantity = safe_int(data.get('quantity'), 1)
     
@@ -694,7 +697,8 @@ def update_transaction(business_id, transaction_id):
     # 2. Update Transaction Fields
     txn.amount = safe_float(data.get('amount'), txn.amount)
     txn.category = data.get('category', txn.category)
-    txn.type = data.get('type', txn.type)
+    if 'type' in data:
+        txn.type = data['type'].capitalize()
     txn.description = data.get('description', txn.description)
     txn.quantity = safe_int(data.get('quantity'), txn.quantity or 1)
     txn.inventory_item_id = data.get('inventory_item_id', txn.inventory_item_id)

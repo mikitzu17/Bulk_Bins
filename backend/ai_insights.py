@@ -401,6 +401,12 @@ def get_csv_analysis(business_id):
     auth = request.headers.get("Authorization")
     if not auth: return jsonify({"error": "Unauthorized"}), 401
     
+    token = auth.split(" ")[1]
+    user_id = get_user_id(token)
+    role = get_member_role(user_id, business_id)
+    if not role or role not in ['Owner', 'Accountant', 'Analyst']:
+        return jsonify({"error": "Forbidden"}), 403
+
     granularity = request.args.get("granularity", "weekly")
     start_date = request.args.get("startDate", None)
     end_date = request.args.get("endDate", None)
@@ -431,6 +437,12 @@ def get_csv_analysis(business_id):
 def get_transaction_analysis(business_id):
     auth = request.headers.get("Authorization")
     if not auth: return jsonify({"error": "Unauthorized"}), 401
+
+    token = auth.split(" ")[1]
+    user_id = get_user_id(token)
+    role = get_member_role(user_id, business_id)
+    if not role or role not in ['Owner', 'Accountant', 'Analyst']:
+        return jsonify({"error": "Forbidden"}), 403
 
     granularity = request.args.get("granularity", "weekly")
     start_date = request.args.get("startDate", None)
@@ -480,6 +492,12 @@ def get_transaction_analysis(business_id):
 def export_ai_data(business_id):
     auth = request.headers.get("Authorization")
     if not auth: return jsonify({"error": "Unauthorized"}), 401
+
+    token = auth.split(" ")[1]
+    user_id = get_user_id(token)
+    role = get_member_role(user_id, business_id)
+    if not role or role not in ['Owner', 'Accountant', 'Analyst']:
+        return jsonify({"error": "Forbidden"}), 403
 
     results = db.session.query(
         Transaction.timestamp, Transaction.category, Product.name,

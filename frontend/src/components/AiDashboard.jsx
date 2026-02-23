@@ -199,7 +199,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                         </button>
                     )}
 
-                    {(role === "owner" || role === "accountant" || role === "Owner") && (
+                    {(role === "owner" || role === "accountant" || role === "Owner" || role === "Analyst") && (
                         <div className="relative">
                             <button
                                 onClick={() => setShowExportMenu(!showExportMenu)}
@@ -235,7 +235,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                         </div>
                     )}
 
-                    {(role === "owner" || role === "accountant" || role === "Owner") && (
+                    {(role === "owner" || role === "accountant" || role === "Owner" || role === "Analyst") && (
                         <div className="relative">
                             <button
                                 onClick={() => setShowReportsMenu(!showReportsMenu)}

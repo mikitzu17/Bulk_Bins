@@ -595,12 +595,12 @@ const BusinessHome = () => {
     const role = currentBusiness.role;
 
     const navItems = [
-        { icon: LayoutDashboard, label: 'Overview', roles: ['Owner', 'Accountant', 'Analyst', 'Staff'] },
-        { icon: BarChart3, label: 'Analytics', roles: ['Owner', 'Accountant', 'Analyst'] },
-        { icon: Wand2, label: 'AI Prediction', roles: ['Owner', 'Analyst'] },
-        { icon: Package, label: 'Inventory', roles: ['Owner', 'Accountant', 'Staff'] },
-        { icon: DollarSign, label: 'Transactions', roles: ['Owner', 'Accountant', 'Analyst', 'Staff'] },
-        { icon: Settings, label: 'Settings', roles: ['Owner', 'Accountant', 'Analyst', 'Staff'] }
+        { icon: LayoutDashboard, label: 'Overview', roles: ['Owner', 'Accountant', 'Analyst', 'Staff', 'owner'] },
+        { icon: BarChart3, label: 'Analytics', roles: ['Owner', 'Accountant', 'Analyst', 'owner'] },
+        { icon: Wand2, label: 'AI Prediction', roles: ['Owner', 'Accountant', 'Analyst', 'owner'] },
+        { icon: Package, label: 'Inventory', roles: ['Owner', 'Accountant', 'Staff', 'Analyst', 'owner'] },
+        { icon: DollarSign, label: 'Transactions', roles: ['Owner', 'Accountant', 'Analyst', 'Staff', 'owner'] },
+        { icon: Settings, label: 'Settings', roles: ['Owner', 'Accountant', 'Analyst', 'Staff', 'owner'] }
     ].filter(item => item.roles.includes(role));
 
     return (
@@ -899,7 +899,7 @@ const BusinessHome = () => {
                 {/* Pill 1: Logo */}
                 <div className="shrink-0 bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-white/10 px-4 py-4 flex items-center space-x-3 shadow-sm">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                        <img src={Logo} alt="Logo" className="w-8 h-8 object-contain rounded-md drop-shadow-[0_5px_15px_rgba(74,222,128,0.4)]" />
+                        <img src={currentBusiness?.logo_url || Logo} alt="Logo" className="w-8 h-8 object-contain rounded-md drop-shadow-[0_5px_15px_rgba(74,222,128,0.4)]" />
                     </div>
                     <span className="text-xl font-serif tracking-tighter hidden md:block text-slate-900 dark:text-white">BulkBins</span>
                 </div>
@@ -1472,7 +1472,7 @@ const BusinessHome = () => {
                                     <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Live Transaction Stream</p>
                                 </div>
                                 <div className="flex flex-wrap gap-3">
-                                    {role !== 'Analyst' && (
+                                    {(role === 'Owner' || role === 'Accountant' || role === 'Analyst' || role === 'owner') && (
                                         <>
                                             {/* Export Button */}
                                             <button
@@ -1503,7 +1503,7 @@ const BusinessHome = () => {
                                         </>
                                     )}
 
-                                    {role !== 'Analyst' && (
+                                    {(role === 'Owner' || role === 'Accountant' || role === 'Analyst' || role === 'owner') && (
                                         <button
                                             onClick={() => setIsAddingTransaction(true)}
                                             className="bg-primary-500 text-white px-8 py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-primary-500/20 font-black hover:bg-primary-600 transition-all active:scale-95 flex items-center space-x-3"
@@ -1558,7 +1558,7 @@ const BusinessHome = () => {
                                                                 <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Qty: {txn.quantity}</div>
                                                             )}
                                                         </div>
-                                                        {(role === 'Owner' || role === 'Accountant') && (
+                                                        {(role === 'Owner' || role === 'Accountant' || role === 'Analyst' || role === 'owner') && (
                                                             <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                 <button
                                                                     onClick={() => {

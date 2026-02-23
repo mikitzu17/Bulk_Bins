@@ -67,10 +67,12 @@ class BulkBinsAIService:
         if df.empty:
              return {"7_day": 0, "30_day": 0, "confidence": "Low", "amount": 0, "expense_forecast": 0}
 
+        # Normalize types for robust filtering
+        df['type_lower'] = df['type'].str.lower()
         daily_profit = df.groupby('date')['amount'].sum().reset_index()
         
-        # Expense Forecast
-        daily_expense = df[df['type'] == 'Expense'].groupby('date')['val'].sum().reset_index()
+        # Expense Forecast (Case-insensitive)
+        daily_expense = df[df['type_lower'] == 'expense'].groupby('date')['val'].sum().reset_index()
         avg_expense = daily_expense['val'].mean() if not daily_expense.empty else 0
         expense_forecast = avg_expense * 30
 

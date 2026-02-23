@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, send_file, current_app
 from models import db, Transaction, Business, User, BusinessMember
 from business import get_user_id, get_member_role
+from ai_service import ai_service
 from sqlalchemy import func
 from datetime import datetime, timedelta
 import io
@@ -236,7 +237,19 @@ def _build_pdf(transactions, business, user, start_date, end_date):
             self.set_fill_color(240, 253, 244) # Very light green bg
             self.rect(0, 0, 210, 40, 'F')
             
-            self.set_xy(10, 10)
+            # Handle Logo
+            if hasattr(business, 'logo_url') and business.logo_url:
+                try:
+                    # If it's a URL, we might need to handle it differently, 
+                    # but FPDF supports local paths or URLs if configured.
+                    # For now, assume it's a path or public URL.
+                    self.image(business.logo_url, x=10, y=8, h=25)
+                    self.set_xy(50, 10) # Shift text to right of logo
+                except:
+                    self.set_xy(10, 10)
+            else:
+                self.set_xy(10, 10)
+
             self.set_font('Helvetica', 'B', 24)
             self.set_text_color(22, 101, 52)  # Dark green
             self.cell(0, 10, 'FINANCIAL REPORT', 0, 1, 'L')
@@ -516,8 +529,14 @@ def email_report(business_id):
         business = Business.query.get(business_id)
         user = User.query.get(user_id)
 
-        # Priority: Business Primary Email -> Registered User Email
-        recipient = business.email if business.email else user.email
+        # Priority: Owner Emails -> Business Primary Email -> Registered User Email
+        owners = BusinessMember.query.filter_by(business_id=business_id, role='Owner').all()
+        owner_emails = [o.user.email for o in owners if o.user and o.user.email]
+        
+        if owner_emails:
+            recipient = ", ".join(owner_emails)
+        else:
+            recipient = business.email if business.email else user.email
 
         date_range = "All Time"
         if start_date and end_date:
@@ -539,6 +558,34 @@ def email_report(business_id):
             else:
                 owner_name = ", ".join(names[:-1]) + f" & {names[-1]}"
 
+        # Generate AI Insights for the email
+        inventory_items = [i for i in business.items]
+        inventory_data = [{"id": i.id, "name": i.name, "stock_quantity": i.stock_quantity, "reorder_level": i.reorder_level, "lead_time": i.lead_time} for i in inventory_items]
+        
+        # Format transactions for AI service
+        ai_txns = [{
+            "timestamp": t.timestamp.isoformat(),
+            "amount": t.amount,
+            "type": t.type,
+            "profit": t.profit,
+            "inventory_item_id": t.inventory_item_id,
+            "quantity": t.quantity
+        } for t in transactions]
+        
+        ai_dashboard = ai_service.get_dashboard_stats(ai_txns, inventory_data)
+        
+        ai_summary_html = ""
+        if ai_dashboard.get('alerts'):
+            ai_summary_html += '<div style="margin-top: 15px; border-left: 4px solid #ef4444; padding-left: 10px;">'
+            ai_summary_html += '<h4 style="color: #ef4444; margin: 0;">⚠️ AI Alerts</h4>'
+            for alert in ai_dashboard['alerts'][:2]:
+                ai_summary_html += f'<p style="margin: 5px 0;"><strong>{alert["title"]}:</strong> {alert["message"]}</p>'
+            ai_summary_html += '</div>'
+            
+        if ai_dashboard.get('prediction'):
+            pred = ai_dashboard['prediction']
+            ai_summary_html += f'<p style="margin-top: 15px;">🚀 <strong>AI Prediction:</strong> Based on current trends, your estimated net profit for the next 30 days is <strong>Rs. {pred["amount"]:,.2f}</strong> (Confidence: {pred["confidence"]}).</p>'
+
         # Build email
         fmt_str = ", ".join([f.upper() for f in formats])
         subject = f"[{business.name}] Financial Report ({fmt_str}) - {date_range}"
@@ -555,6 +602,7 @@ def email_report(business_id):
                 <p><strong>Total Expenses:</strong> Rs. {total_expenses:,.2f}</p>
                 <p style="font-size: 1.1em;"><strong>Net Profit:</strong> Rs. {net:,.2f}</p>
                 <p><strong>Transactions:</strong> {len(transactions)}</p>
+                {ai_summary_html}
             </div>
             <p>Exported by: {user.username} ({user.email})</p>
             <p>The detailed reports are attached to this email.</p>

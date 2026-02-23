@@ -30,6 +30,7 @@ class Business(db.Model):
     email = db.Column(db.String(120), nullable=True)
     secondary_email = db.Column(db.String(120), nullable=True)
     status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    logo_url = db.Column(db.String(500), nullable=True)
     
     # Relationships
     members = db.relationship('BusinessMember', backref='business', lazy=True, cascade="all, delete-orphan")

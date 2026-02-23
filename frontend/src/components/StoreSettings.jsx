@@ -16,7 +16,8 @@ export default function StoreSettings({ businessId, theme }) {
         name: '',
         currency: 'INR',
         email: '',
-        secondary_email: ''
+        secondary_email: '',
+        logo_url: ''
     });
 
     const currencyOptions = [
@@ -52,7 +53,8 @@ export default function StoreSettings({ businessId, theme }) {
                 name: currentBusiness.name || '',
                 currency: currentBusiness.currency || 'INR',
                 email: currentBusiness.email || '',
-                secondary_email: currentBusiness.secondary_email || ''
+                secondary_email: currentBusiness.secondary_email || '',
+                logo_url: currentBusiness.logo_url || ''
             });
             fetchMembers();
         }
@@ -260,6 +262,21 @@ export default function StoreSettings({ businessId, theme }) {
                                         onChange={(e) => setSettingsForm({ ...settingsForm, secondary_email: e.target.value })}
                                         className={`${inputClass} pl-10`}
                                         placeholder="secondary@store.com"
+                                        disabled={!isOwner}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="col-span-1 md:col-span-2 space-y-2">
+                                <label className="text-sm font-medium text-slate-400">Business Logo URL</label>
+                                <div className="relative">
+                                    <Settings className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        value={settingsForm.logo_url}
+                                        onChange={(e) => setSettingsForm({ ...settingsForm, logo_url: e.target.value })}
+                                        className={`${inputClass} pl-10`}
+                                        placeholder="https://example.com/logo.png"
                                         disabled={!isOwner}
                                     />
                                 </div>
