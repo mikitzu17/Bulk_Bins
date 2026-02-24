@@ -219,13 +219,13 @@ const MasterAdminDashboard = () => {
             {/* Content */}
             <div className="relative z-10 w-full">
                 {/* Navbar */}
-                <nav className="fixed top-0 w-full z-50 py-4 backdrop-blur-md bg-slate-950/40 border-b border-white/5">
+                <nav className="fixed top-0 w-full z-50 py-4 backdrop-blur-md bg-slate-100/40 dark:bg-slate-950/40 border-b border-slate-100 dark:border-white/5">
                     <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
                         <div className="flex items-center space-x-4 group cursor-pointer">
                             <img src={Logo} alt="BulkBins Logo" className="w-10 h-10 object-contain rounded-md drop-shadow-[0_10px_30px_rgba(74,222,128,0.3)] animate-float" />
                             <div className="flex flex-col">
-                                <span className="text-2xl font-serif tracking-tighter text-white">BulkBins</span>
-                                <span className="text-[8px] font-extrabold uppercase tracking-[0.3em] text-primary-400">Master Control</span>
+                                <span className="text-2xl font-serif font-black tracking-tighter text-slate-900 dark:text-white">BulkBins</span>
+                                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-primary-500">Master Control</span>
                             </div>
                         </div>
                         <div className="flex items-center space-x-6">
@@ -233,9 +233,9 @@ const MasterAdminDashboard = () => {
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-lg shadow-red-500/20">
                                     <Shield className="w-4 h-4 text-white" />
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-white text-base font-medium">{user?.name}</span>
-                                    <span className="text-xs text-red-400 font-bold uppercase tracking-widest">Master Admin</span>
+                                <div className="flex flex-col text-right">
+                                    <span className="text-slate-900 dark:text-white text-base font-black">{user?.name}</span>
+                                    <span className="text-xs text-red-500 font-black uppercase tracking-widest">Master Admin</span>
                                 </div>
                             </div>
                             <button
@@ -251,14 +251,14 @@ const MasterAdminDashboard = () => {
 
                 <main className="max-w-7xl mx-auto px-6 pt-28 pb-12">
                     {/* Tabs */}
-                    <div className="flex flex-wrap gap-3 glass p-2.5 rounded-2xl mb-12 w-fit">
+                    <div className="nav-pills mb-12 w-fit">
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => { setActiveTab(tab.id); setSearchTerm(''); }}
-                                className={`relative px-6 py-3.5 rounded-xl text-base font-bold transition-all flex items-center space-x-3 group ${activeTab === tab.id
-                                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/25'
-                                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                                className={`relative px-6 py-3 py-3.5 rounded-xl text-base font-black transition-all flex items-center space-x-3 group ${activeTab === tab.id
+                                    ? 'bg-white dark:bg-slate-700 text-primary-500 shadow-md'
+                                    : 'text-slate-900 dark:text-white hover:text-primary-500 dark:hover:text-primary-400'
                                     }`}
                             >
                                 <tab.icon className="w-5 h-5" />
@@ -283,7 +283,7 @@ const MasterAdminDashboard = () => {
                                     <div className="absolute inset-0 bg-primary-500/20 blur-2xl rounded-full"></div>
                                     <RefreshCw className="w-10 h-10 text-primary-400 animate-spin relative z-10" />
                                 </div>
-                                <p className="text-slate-500 mt-6 text-sm font-medium tracking-wide">Loading data...</p>
+                                <p className="text-slate-300 mt-6 text-sm font-medium tracking-wide">Loading data...</p>
                             </div>
                         ) : (
                             <>
@@ -292,23 +292,23 @@ const MasterAdminDashboard = () => {
                                     <div className="space-y-8">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                             {statCards.map((card, i) => (
-                                                <div key={i} className={`glass p-8 rounded-3xl border ${card.borderColor} hover:scale-[1.03] transition-all duration-300 group cursor-default shadow-2xl`}>
+                                                <div key={i} className="glass p-8">
                                                     <div className="flex items-center justify-between mb-5">
                                                         <div className={`p-4 bg-gradient-to-br ${card.gradient} rounded-2xl group-hover:scale-110 transition-transform`}>
                                                             <card.icon className={`w-7 h-7 ${card.iconColor}`} />
                                                         </div>
-                                                        <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                                                        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-primary-500 transition-colors" />
                                                     </div>
-                                                    <p className="text-4xl font-serif text-white mb-2 tracking-tight">{card.value}</p>
-                                                    <p className="text-xs text-slate-300 uppercase tracking-[0.2em] font-black">{card.label}</p>
+                                                    <p className="text-4xl font-serif font-black text-slate-900 dark:text-white mb-2 tracking-tight">{card.value}</p>
+                                                    <p className="text-xs text-slate-900 dark:text-white uppercase tracking-[0.2em] font-black opacity-80">{card.label}</p>
                                                 </div>
                                             ))}
                                         </div>
 
                                         {/* Quick Actions */}
-                                        <div className="glass p-10 rounded-3xl border-white/5">
-                                            <h3 className="text-xl font-serif text-white mb-8 tracking-tight flex items-center space-x-4">
-                                                <Activity className="w-6 h-6 text-primary-400" />
+                                        <div className="glass p-10">
+                                            <h3 className="text-2xl font-serif font-black text-slate-900 dark:text-white mb-8 tracking-tight flex items-center space-x-4">
+                                                <Activity className="w-6 h-6 text-primary-500" />
                                                 <span>Master Controls</span>
                                             </h3>
                                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -317,10 +317,10 @@ const MasterAdminDashboard = () => {
                                                     { label: 'Manage Businesses', action: () => setActiveTab('businesses'), icon: Building2, color: 'emerald' },
                                                     { label: 'Review Pending', action: () => setActiveTab('pending'), icon: Clock, color: 'amber', highlight: stats.pending_businesses > 0 },
                                                 ].map((item, i) => (
-                                                    <button key={i} onClick={item.action} className={`p-6 rounded-2xl border text-left transition-all hover:scale-[1.02] active:scale-95 group ${item.highlight ? 'border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 shadow-lg shadow-amber-500/5' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}>
-                                                        <item.icon className={`w-7 h-7 mb-4 ${item.highlight ? 'text-amber-400' : 'text-slate-200'} group-hover:scale-110 transition-transform`} />
-                                                        <span className="text-white font-bold text-base block">{item.label}</span>
-                                                        {item.highlight && <span className="mt-2 inline-block px-3 py-1 rounded-full bg-amber-500/30 text-amber-200 text-xs font-black uppercase tracking-wider">{stats.pending_businesses} Actions Required</span>}
+                                                    <button key={i} onClick={item.action} className={`p-6 rounded-2xl border text-left transition-all hover:scale-[1.02] active:scale-95 group ${item.highlight ? 'border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 shadow-lg shadow-amber-500/5' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700'}`}>
+                                                        <item.icon className={`w-7 h-7 mb-4 ${item.highlight ? 'text-amber-500' : 'text-slate-600 dark:text-slate-400'} group-hover:scale-110 transition-transform`} />
+                                                        <span className="text-slate-900 dark:text-white font-black text-base block">{item.label}</span>
+                                                        {item.highlight && <span className="mt-2 inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-black uppercase tracking-wider">{stats.pending_businesses} Actions Required</span>}
                                                     </button>
                                                 ))}
                                             </div>
@@ -362,7 +362,7 @@ const MasterAdminDashboard = () => {
                                                                     </div>
                                                                     <div>
                                                                         <div className="font-bold text-white text-lg">{u.username}</div>
-                                                                        <div className="text-slate-300 text-sm font-medium">{u.email}</div>
+                                                                        <div className="text-white text-sm font-medium">{u.email}</div>
                                                                     </div>
                                                                 </div>
                                                             </td>
@@ -382,14 +382,14 @@ const MasterAdminDashboard = () => {
                                                                         <span key={i} className="px-3.5 py-1.5 bg-white/10 rounded-full text-xs text-white border border-white/20 font-bold shadow-sm">
                                                                             {b}
                                                                         </span>
-                                                                    )) : <span className="text-slate-500 italic text-sm font-medium">No assigned stores</span>}
+                                                                    )) : <span className="text-white italic text-sm font-medium">No assigned stores</span>}
                                                                 </div>
                                                             </td>
                                                             <td className="p-6 text-right">
                                                                 {!u.is_master_admin && (
                                                                     <button
                                                                         onClick={() => handleDeleteUser(u.id)}
-                                                                        className="p-3 text-slate-300 hover:text-red-400 hover:bg-red-500/20 rounded-xl transition-all group-hover:opacity-100 opacity-50 shadow-sm"
+                                                                        className="p-3 text-slate-300 hover:text-red-400 hover:bg-red-500/20 rounded-xl transition-all group-hover:opacity-100 shadow-sm"
                                                                         title="Delete User"
                                                                     >
                                                                         <Trash2 className="w-5 h-5" />
@@ -400,7 +400,7 @@ const MasterAdminDashboard = () => {
                                                     ))}
                                                     {filteredUsers.length === 0 && (
                                                         <tr>
-                                                            <td colSpan={4} className="p-10 text-center text-slate-600 text-sm">No users found</td>
+                                                            <td colSpan={4} className="p-10 text-center text-white text-sm">No users found</td>
                                                         </tr>
                                                     )}
                                                 </tbody>
@@ -429,7 +429,7 @@ const MasterAdminDashboard = () => {
                                                     <div className="flex justify-between items-start mb-6">
                                                         <div>
                                                             <h3 className="text-xl font-serif text-white group-hover:text-primary-400 transition-colors tracking-tight leading-tight">{b.name}</h3>
-                                                            <p className="text-slate-300 text-xs mt-2 font-bold uppercase tracking-widest opacity-60">ID: {b.id} • Registered: {b.created_at}</p>
+                                                            <p className="text-white text-xs mt-2 font-bold uppercase tracking-widest">ID: {b.id} • Registered: {b.created_at}</p>
                                                         </div>
                                                         <div className="p-3 bg-white/5 rounded-2xl group-hover:bg-primary-500/20 transition-colors shadow-inner">
                                                             <Building2 className="w-6 h-6 text-slate-200 group-hover:text-primary-300 transition-colors" />
@@ -438,15 +438,15 @@ const MasterAdminDashboard = () => {
 
                                                     <div className="space-y-4 mb-8 p-5 bg-white/3 rounded-2xl border border-white/5">
                                                         <div className="flex justify-between items-center text-base">
-                                                            <span className="text-slate-300 font-bold text-sm tracking-wide">Deployment</span>
+                                                            <span className="text-white font-bold text-sm tracking-wide">Deployment</span>
                                                             {getStatusBadge(b.status)}
                                                         </div>
                                                         <div className="flex justify-between items-center text-base">
-                                                            <span className="text-slate-300 font-bold text-sm tracking-wide">Operator Count</span>
+                                                            <span className="text-white font-bold text-sm tracking-wide">Operator Count</span>
                                                             <span className="text-white font-black text-lg">{b.member_count}</span>
                                                         </div>
                                                         <div className="flex justify-between items-start text-base">
-                                                            <span className="text-slate-300 font-bold text-sm tracking-wide">Control Authority</span>
+                                                            <span className="text-white font-bold text-sm tracking-wide">Control Authority</span>
                                                             <div className="text-right">
                                                                 {b.owners.map((o, i) => (
                                                                     <div key={i} className="text-white font-black text-sm">{o}</div>
@@ -465,7 +465,7 @@ const MasterAdminDashboard = () => {
                                                 </div>
                                             ))}
                                             {filteredBusinesses.length === 0 && (
-                                                <div className="col-span-full text-center py-16 text-slate-600 text-sm">No businesses found</div>
+                                                <div className="col-span-full text-center py-16 text-white text-sm">No businesses found</div>
                                             )}
                                         </div>
                                     </div>
@@ -481,7 +481,7 @@ const MasterAdminDashboard = () => {
                                                     <CheckCircle2 className="w-16 h-16 text-primary-400 relative z-10" />
                                                 </div>
                                                 <h3 className="text-2xl font-serif text-white mb-3 tracking-tight">All Clear!</h3>
-                                                <p className="text-slate-500 font-medium text-sm">No pending business registrations to review at this time.</p>
+                                                <p className="text-white font-medium text-sm">No pending business registrations to review at this time.</p>
                                             </div>
                                         ) : (
                                             <>
@@ -493,7 +493,7 @@ const MasterAdminDashboard = () => {
                                                         <p className="text-white font-black text-lg">
                                                             Action Required: <span className="text-amber-400">{pendingBusinesses.length}</span> registration{pendingBusinesses.length > 1 ? 's' : ''}
                                                         </p>
-                                                        <p className="text-slate-300 text-sm mt-1 font-medium">Please review and authorize or decline the following entity creation requests.</p>
+                                                        <p className="text-white text-sm mt-1 font-medium">Please review and authorize or decline the following entity creation requests.</p>
                                                     </div>
                                                 </div>
 
@@ -512,7 +512,7 @@ const MasterAdminDashboard = () => {
                                                                             </span>
                                                                         </div>
                                                                         <h3 className="text-2xl font-serif text-white tracking-tight leading-tight">{b.name}</h3>
-                                                                        <p className="text-slate-300 text-sm mt-2 font-bold opacity-70">Initiated on {b.created_at}</p>
+                                                                        <p className="text-white text-sm mt-2 font-bold">Initiated on {b.created_at}</p>
                                                                     </div>
                                                                     <div className="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
                                                                         <Building2 className="w-8 h-8 text-amber-400" />
@@ -521,15 +521,15 @@ const MasterAdminDashboard = () => {
 
                                                                 <div className="space-y-4 mb-8 p-6 bg-white/5 rounded-3xl border border-white/5 shadow-inner">
                                                                     <div className="flex justify-between items-center">
-                                                                        <span className="text-slate-300 text-sm font-bold uppercase tracking-wide">Primary Owner</span>
+                                                                        <span className="text-white text-sm font-bold uppercase tracking-wide">Primary Owner</span>
                                                                         <span className="text-white font-black text-base">{b.owners.join(', ') || 'Unknown'}</span>
                                                                     </div>
                                                                     <div className="flex justify-between items-center">
-                                                                        <span className="text-slate-300 text-sm font-bold uppercase tracking-wide">Owner Contact</span>
+                                                                        <span className="text-white text-sm font-bold uppercase tracking-wide">Owner Contact</span>
                                                                         <span className="text-white font-medium text-sm">{b.owner_emails?.join(', ') || 'N/A'}</span>
                                                                     </div>
                                                                     <div className="flex justify-between items-center">
-                                                                        <span className="text-slate-300 text-sm font-bold uppercase tracking-wide">Initial Staff</span>
+                                                                        <span className="text-white text-sm font-bold uppercase tracking-wide">Initial Staff</span>
                                                                         <span className="text-white font-black text-base">{b.member_count} Members</span>
                                                                     </div>
                                                                 </div>
@@ -575,7 +575,7 @@ const MasterAdminDashboard = () => {
                                 <span className="text-[10px] text-primary-400 font-black uppercase tracking-[0.3em] mt-1">Master Control Authority</span>
                             </div>
                         </div>
-                        <p className="text-slate-400 text-sm font-medium tracking-wide">
+                        <p className="text-white text-sm font-medium tracking-wide">
                             Authorized Access Only • System Monitoring Active • {new Date().getFullYear()}
                         </p>
                     </div>

@@ -12,6 +12,20 @@ export const AuthProvider = ({ children }) => {
     const [businesses, setBusinesses] = useState([]);
     const [currentBusiness, setCurrentBusiness] = useState(null);
 
+    // Global theme state
+    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+
+    useEffect(() => {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+
     useEffect(() => {
         const verifySession = async () => {
             if (token) {
@@ -180,7 +194,9 @@ export const AuthProvider = ({ children }) => {
             setCurrentBusiness,
             createBusiness,
             deleteBusiness,
-            updateProfile
+            updateProfile,
+            theme,
+            toggleTheme
         }}>
             {children}
         </AuthContext.Provider>

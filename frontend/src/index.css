@@ -23,7 +23,14 @@ body {
 }
 
 .glass {
-  @apply bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10 backdrop-blur-md border shadow-xl;
+  @apply rounded-3xl shadow-xl transition-all duration-300;
+  @apply bg-white border border-slate-100;
+  @apply dark:bg-slate-900/50 dark:border-white/5;
+  @apply backdrop-blur-md;
+}
+
+.nav-pills {
+  @apply bg-slate-100/50 dark:bg-slate-800/50 p-2 rounded-2xl flex gap-4 transition-all duration-300;
 }
 
 @keyframes float {
@@ -134,9 +141,17 @@ input[type="number"] {
 }
 
 @keyframes slow-zoom {
-  0% { transform: scale(1.05); }
-  50% { transform: scale(1.08); }
-  100% { transform: scale(1.05); }
+  0% {
+    transform: scale(1.05);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1.05);
+  }
 }
 
 .animate-slow-zoom {
@@ -144,8 +159,13 @@ input[type="number"] {
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%) skewX(-15deg); }
-  100% { transform: translateX(200%) skewX(-15deg); }
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
 }
 
 .animate-shimmer {
@@ -160,18 +180,23 @@ input[type="number"] {
   left: 0;
   width: 50%;
   height: 100%;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
+  background: linear-gradient(to right,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent);
   animation: shimmer 3s infinite;
 }
 
 @keyframes soft-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 .group:hover .animate-soft-bounce {
@@ -179,9 +204,17 @@ input[type="number"] {
 }
 
 @keyframes gradient-move {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-gradient-move {

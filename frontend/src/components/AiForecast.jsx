@@ -51,8 +51,19 @@ function AiForecast({ businessId, theme }) {
     const fileInputRef = useRef(null);
 
     const isDark = theme === 'dark';
-    const textColor = isDark ? '#cbd5e1' : '#475569';
-    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+    const textColor = isDark ? '#ffffff' : '#0f172a';
+    const subTextColor = isDark ? '#ffffff' : '#0f172a';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)';
+
+    const formatXAxis = (value) => {
+        if (!value) return '';
+        const date = new Date(value);
+        if (isNaN(date)) return value;
+
+        if (csvGranularity === 'daily') return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        if (csvGranularity === 'monthly') return date.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+        return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    };
 
     const chartOptions = {
         responsive: true,
@@ -72,8 +83,26 @@ function AiForecast({ businessId, theme }) {
             }
         },
         scales: {
-            x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } },
-            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 }, callback: (v) => formatINR(v) } }
+            x: {
+                grid: { display: false },
+                ticks: {
+                    color: subTextColor,
+                    font: { size: 10, weight: '600' },
+                    callback: function (val, index) {
+                        const label = this.getLabelForValue(val);
+                        return formatXAxis(label);
+                    }
+                }
+            },
+            y: {
+                beginAtZero: true,
+                grid: { color: gridColor, drawBorder: false },
+                ticks: {
+                    color: subTextColor,
+                    font: { size: 10, weight: '600' },
+                    callback: (v) => '₹' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)
+                }
+            }
         }
     };
 
@@ -149,7 +178,7 @@ function AiForecast({ businessId, theme }) {
         return (
             <div className="flex flex-col items-center justify-center p-12">
                 <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-slate-400 font-serif animate-pulse">Analyzing historical data patterns...</p>
+                <p className="text-slate-900 dark:text-white font-serif animate-pulse">Analyzing historical data patterns...</p>
             </div>
         );
     }
@@ -159,10 +188,10 @@ function AiForecast({ businessId, theme }) {
         return (
             <div className="space-y-8">
                 <div>
-                    <h2 className="text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0f172a] dark:text-white flex items-center gap-3">
-                        <span className="text-amber-400">✨</span> AI Prediction Hub
+                    <h2 className="text-3xl md:text-4xl font-serif font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3 drop-shadow-sm">
+                        <span className="text-primary-500 animate-pulse">✨</span> AI <span className="text-primary-500 italic">Prediction</span> Hub
                     </h2>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Upload a dataset to unlock AI-powered forecasting</p>
+                    <p className="text-slate-900 dark:text-white text-sm font-black mt-2 opacity-100 tracking-wide">Upload a dataset to unlock AI-powered forecasting</p>
                 </div>
 
                 {/* UPLOAD DROPZONE */}
@@ -174,7 +203,7 @@ function AiForecast({ businessId, theme }) {
                     onClick={() => fileInputRef.current?.click()}
                     className={`relative cursor-pointer group flex flex-col items-center justify-center p-16 rounded-[2.5rem] border-2 border-dashed transition-all duration-500 ${dragActive
                         ? 'border-amber-500 bg-amber-500/10 dark:bg-amber-500/5 scale-[1.01]'
-                        : 'border-slate-300 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] hover:border-amber-400 hover:bg-amber-500/5'
+                        : 'border-slate-300 dark:border-white/10 bg-white/50 dark:bg-slate-800 hover:border-amber-400 hover:bg-amber-500/5'
                         }`}
                 >
                     <input
@@ -197,13 +226,13 @@ function AiForecast({ businessId, theme }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">
+                            <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2 underline decoration-primary-500/20">
                                 Drop your CSV dataset here
                             </h3>
-                            <p className="text-slate-500 dark:text-slate-400 text-sm text-center max-w-md mb-4">
-                                or <span className="text-amber-600 dark:text-amber-400 font-bold underline underline-offset-2">click to browse</span> — Upload a transaction history CSV with Date, Type, Category, and Amount columns
+                            <p className="text-slate-900 dark:text-white text-sm text-center max-w-md mb-4 font-black">
+                                or <span className="text-primary-600 dark:text-primary-400 underline underline-offset-4 decoration-2">click to browse</span> — Securely upload your ledger
                             </p>
-                            <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                            <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest text-slate-900 dark:text-white">
                                 <span>📊 .CSV format</span>
                                 <span>•</span>
                                 <span>📈 Sales & Expenses</span>
@@ -223,11 +252,11 @@ function AiForecast({ businessId, theme }) {
             {/* HEADER */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-4">
                 <div>
-                    <h2 className="text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0f172a] dark:text-white flex items-center gap-3">
+                    <h2 className="text-3xl md:text-4xl font-serif font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
                         <span className="text-amber-400">✨</span> AI Prediction Hub
                     </h2>
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+                        <p className="text-slate-900 dark:text-white text-sm font-bold">
                             Multi-series forecasting & trend analysis
                         </p>
                         {/* DATA SOURCE BADGE */}
@@ -266,14 +295,14 @@ function AiForecast({ businessId, theme }) {
 
             {/* GRANULARITY SELECTOR */}
             <div className="mb-6">
-                <div className="bg-slate-100 dark:bg-white/5 p-1.5 rounded-[20px] shadow-sm border border-slate-200 dark:border-white/10 flex flex-wrap gap-1">
+                <div className="glass p-8 relative overflow-hidden group">
                     {GRANULARITY_OPTIONS.map((g) => (
                         <button
                             key={g.key}
                             onClick={() => setCsvGranularity(g.key)}
                             className={`px-4 md:px-5 py-2 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${csvGranularity === g.key
                                 ? 'bg-amber-500 text-white shadow-xl shadow-amber-500/20 scale-105'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-500 hover:bg-amber-500/10 dark:hover:bg-amber-500/5'}`}
+                                : 'text-slate-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-500 hover:bg-amber-500/10 dark:hover:bg-amber-500/5'}`}
                         >
                             {g.label}
                         </button>
@@ -282,11 +311,11 @@ function AiForecast({ businessId, theme }) {
 
                 {/* CUSTOM DATE PICKERS */}
                 {csvGranularity === 'custom' && (
-                    <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-white/60 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
-                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 flex-shrink-0">From</span>
+                    <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-white/60 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
+                        <span className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white flex-shrink-0">From</span>
                         <input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)}
                             className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30" />
-                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 flex-shrink-0">To</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white flex-shrink-0">To</span>
                         <input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)}
                             className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30" />
                     </div>
@@ -305,11 +334,16 @@ function AiForecast({ businessId, theme }) {
                     {/* MULTI-SERIES CHART */}
                     <div className="bg-white dark:bg-slate-900/50 backdrop-blur-xl p-8 rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-2xl">
                         <div className="flex justify-between items-center mb-8">
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Historical vs AI Forecast</h3>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                Historical vs AI Forecast
+                                <span className="ml-2 text-[10px] font-black uppercase tracking-widest text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-full">
+                                    {csvGranularity === 'custom' ? 'Custom' : GRANULARITY_OPTIONS.find(g => g.key === csvGranularity)?.label || csvGranularity}
+                                </span>
+                            </h3>
                             <div className="flex gap-4">
-                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"></div><span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">Sales</span></div>
-                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-rose-500"></div><span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">Expenses</span></div>
-                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"></div><span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">Forecast</span></div>
+                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"></div><span className="text-[10px] text-slate-900 dark:text-white uppercase font-black tracking-wider">Sales</span></div>
+                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-rose-500"></div><span className="text-[10px] text-slate-900 dark:text-white uppercase font-black tracking-wider">Expenses</span></div>
+                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"></div><span className="text-[10px] text-slate-900 dark:text-white uppercase font-black tracking-wider">Forecast</span></div>
                             </div>
                         </div>
                         <div className="h-[400px]">
@@ -370,12 +404,12 @@ function AiForecast({ businessId, theme }) {
                             <h4 className="text-emerald-600 dark:text-emerald-400 text-xs font-black uppercase tracking-[0.2em] mb-4">AI Observations</h4>
                             <ul className="space-y-4">
                                 {analysisData.insights?.map((insight, idx) => (
-                                    <li key={idx} className="flex items-start gap-3 text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    <li key={idx} className="flex items-start gap-3 text-sm font-bold text-slate-900 dark:text-white">
                                         <span className="mt-1">✨</span> {insight}
                                     </li>
                                 ))}
                                 {analysisData.total_stats?.margin > 20 && (
-                                    <li key="margin-insight" className="flex items-start gap-3 text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    <li key="margin-insight" className="flex items-start gap-3 text-sm font-medium text-slate-900 dark:text-white">
                                         <span className="mt-1">📈</span> Healthy margin detected ({analysisData.total_stats.margin.toFixed(1)}%). Business scaling potential is high.
                                     </li>
                                 )}
@@ -386,7 +420,7 @@ function AiForecast({ businessId, theme }) {
                             <p className="text-3xl md:text-4xl font-serif font-black text-slate-900 dark:text-white text-center truncate">
                                 {formatINR((analysisData.forecast?.profit?.reduce((acc, curr) => acc + curr.value, 0) || 0))}
                             </p>
-                            <p className="text-[10px] text-slate-500 text-center mt-3 font-bold uppercase tracking-widest">Next 8 Periods Cumulative</p>
+                            <p className="text-[10px] text-slate-900 dark:text-white text-center mt-3 font-black uppercase tracking-widest">Next 8 Periods Cumulative</p>
                         </div>
                     </div>
                 </div>
@@ -417,7 +451,7 @@ function AiForecast({ businessId, theme }) {
                                 }}
                             />
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <p className="text-[10px] uppercase font-bold text-slate-500">Top Spend</p>
+                                <p className="text-[10px] uppercase font-black text-slate-900 dark:text-white">Top Spend</p>
                                 <p className="text-lg font-bold text-slate-900 dark:text-white">{analysisData.category_breakdown?.[0]?.category || 'N/A'}</p>
                             </div>
                         </div>
@@ -432,7 +466,7 @@ function AiForecast({ businessId, theme }) {
                             { label: "Calculated Profit", value: analysisData.total_stats?.profit, color: "text-sky-600 dark:text-sky-400" }
                         ].map((s, i) => (
                             <div key={i} className="bg-white dark:bg-white/[0.02] p-6 rounded-2xl border border-slate-200 dark:border-white/5 flex justify-between items-center group hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{s.label}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">{s.label}</span>
                                 <span className={`text-2xl font-serif font-black ${s.color}`}>{formatINR(s.value || 0)}</span>
                             </div>
                         ))}
@@ -441,17 +475,17 @@ function AiForecast({ businessId, theme }) {
                     {/* TOP PRODUCTS TABLE */}
                     {analysisData.product_breakdown && analysisData.product_breakdown.length > 0 && (
                         <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl p-6 rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-2xl">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-4">🏆 Top Products</h3>
+                            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white mb-4">🏆 Top Products</h3>
                             <div className="space-y-2">
                                 {analysisData.product_breakdown.map((p, idx) => (
                                     <div key={idx} className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                                         <div className="flex items-center gap-3 min-w-0">
-                                            <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black ${idx === 0 ? 'bg-amber-500/20 text-amber-600' : idx === 1 ? 'bg-slate-300/30 text-slate-500' : idx === 2 ? 'bg-orange-500/20 text-orange-600' : 'bg-slate-100 dark:bg-white/5 text-slate-400'
+                                            <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black ${idx === 0 ? 'bg-amber-500/20 text-amber-600' : idx === 1 ? 'bg-slate-300/30 text-slate-500' : idx === 2 ? 'bg-orange-500/20 text-orange-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
                                                 }`}>{idx + 1}</span>
-                                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate">{p.product}</span>
+                                            <span className="text-sm font-bold text-slate-900 dark:text-white truncate">{p.product}</span>
                                         </div>
                                         <div className="flex items-center gap-4 flex-shrink-0">
-                                            <span className="text-[10px] font-bold text-slate-400">{p.quantity} sold</span>
+                                            <span className="text-[10px] font-black text-slate-900 dark:text-white">{p.quantity} sold</span>
                                             <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{formatINR(p.revenue)}</span>
                                         </div>
                                     </div>

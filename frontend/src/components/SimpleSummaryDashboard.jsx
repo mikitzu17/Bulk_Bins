@@ -167,19 +167,19 @@ const SimpleSummaryDashboard = ({ transactions = [] }) => {
             {
                 label: 'Revenue',
                 data: aggregatedData.revenueData,
-                backgroundColor: 'rgba(59, 130, 246, 0.6)', // Blue
+                backgroundColor: 'rgba(59, 130, 246, 0.9)', // Higher opacity
                 borderRadius: 8,
             },
             {
                 label: 'Expenses',
                 data: aggregatedData.expenseData,
-                backgroundColor: 'rgba(244, 63, 94, 0.6)', // Rose
+                backgroundColor: 'rgba(244, 63, 94, 0.9)', // Higher opacity
                 borderRadius: 8,
             },
             {
                 label: 'Profit',
                 data: aggregatedData.profitData,
-                backgroundColor: 'rgba(16, 185, 129, 0.6)', // Emerald
+                backgroundColor: 'rgba(16, 185, 129, 0.9)', // Higher opacity
                 borderRadius: 8,
             }
         ],
@@ -188,41 +188,63 @@ const SimpleSummaryDashboard = ({ transactions = [] }) => {
     const options = {
         responsive: true,
         plugins: {
-            legend: { position: 'top', labels: { color: '#94a3b8', font: { weight: 'bold' } } },
-            tooltip: { backgroundColor: '#1e293b', titleColor: '#f8fafc', bodyColor: '#cbd5e1' }
+            legend: {
+                position: 'top',
+                labels: {
+                    color: 'currentColor',
+                    font: { size: 12, weight: '800' }
+                }
+            },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                titleColor: '#f8fafc',
+                bodyColor: '#cbd5e1'
+            }
         },
         scales: {
-            x: { grid: { display: false }, ticks: { color: '#64748b' } },
-            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } }
+            x: {
+                grid: { display: false },
+                ticks: {
+                    color: 'currentColor',
+                    font: { size: 11, weight: '700' }
+                }
+            },
+            y: {
+                grid: { color: 'rgba(128, 128, 128, 0.1)' },
+                ticks: {
+                    color: 'currentColor',
+                    font: { size: 11, weight: '700' }
+                }
+            }
         }
     };
 
     const periodTotalProfit = aggregatedData.profitData.reduce((acc, val) => acc + val, 0);
 
     return (
-        <div className="bg-slate-50 rounded-[2.5rem] p-8 text-slate-900 shadow-sm border border-slate-200">
+        <div className="glass p-8 animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex items-center space-x-4 mb-10">
-                <div className="p-3 bg-indigo-900 rounded-2xl text-white">
+                <div className="p-3 bg-primary-500 rounded-2xl text-white">
                     <Calculator className="w-6 h-6" />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-800">Profit Calculation Dashboard</h2>
+                <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Profit Calculation Dashboard</h2>
             </div>
 
             {/* Main Content Card */}
-            <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100">
+            <div className="glass p-8">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
-                        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">{period} Profit Analysis</h3>
+                        <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">{period} Profit Analysis</h3>
                     </div>
 
                     {/* Period Switcher */}
-                    <div className="flex flex-wrap bg-slate-100 p-1 rounded-xl gap-1">
+                    <div className="nav-pills">
                         {['Daily', 'Weekly', 'Monthly', 'Quarterly', 'HalfYearly', 'Yearly', 'Custom'].map((p) => (
                             <button
                                 key={p}
                                 onClick={() => setPeriod(p)}
-                                className={`px-4 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all whitespace-nowrap ${period === p ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                className={`px-4 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all whitespace-nowrap ${period === p ? 'bg-white dark:bg-primary-500 text-primary-600 dark:text-white shadow-sm' : 'text-slate-900 dark:text-white hover:text-slate-900 dark:hover:text-white'
                                     }`}
                             >
                                 {p === 'HalfYearly' ? 'Half-Year' : p === 'Custom' ? '📅 Custom' : p}
@@ -233,20 +255,20 @@ const SimpleSummaryDashboard = ({ transactions = [] }) => {
 
                 {/* Custom Date Range Pickers */}
                 {period === 'Custom' && (
-                    <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500 flex-shrink-0">From</span>
+                    <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-white/10">
+                        <span className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white flex-shrink-0">From</span>
                         <input
                             type="date"
                             value={customStart}
                             onChange={(e) => setCustomStart(e.target.value)}
-                            className="px-3 py-2 bg-white border border-slate-200 text-slate-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                            className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                         />
-                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500 flex-shrink-0">To</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white flex-shrink-0">To</span>
                         <input
                             type="date"
                             value={customEnd}
                             onChange={(e) => setCustomEnd(e.target.value)}
-                            className="px-3 py-2 bg-white border border-slate-200 text-slate-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                            className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                         />
                     </div>
                 )}
@@ -257,27 +279,27 @@ const SimpleSummaryDashboard = ({ transactions = [] }) => {
 
                 {/* Features List */}
                 <div className="space-y-4 mb-10 ml-2">
-                    <div className="flex items-center space-x-3 text-indigo-600">
-                        <TrendingUp className="w-5 h-5" />
-                        <span className="text-sm font-bold">Automatic profit calculation</span>
+                    <div className="flex items-center space-x-3 text-slate-900 dark:text-white">
+                        <TrendingUp className="w-5 h-5 text-primary-500" />
+                        <span className="text-sm font-black">Automatic profit calculation</span>
                     </div>
-                    <div className="flex items-center space-x-3 text-indigo-500">
-                        <Calendar className="w-5 h-5" />
-                        <span className="text-sm font-bold">Daily/weekly/monthly summaries</span>
+                    <div className="flex items-center space-x-3 text-slate-900 dark:text-white">
+                        <Calendar className="w-5 h-5 text-primary-400" />
+                        <span className="text-sm font-black">Daily/weekly/monthly summaries</span>
                     </div>
-                    <div className="flex items-center space-x-3 text-indigo-400">
-                        <BarChart3 className="w-5 h-5" />
-                        <span className="text-sm font-bold">Revenue vs expenses breakdown</span>
+                    <div className="flex items-center space-x-3 text-slate-900 dark:text-white">
+                        <BarChart3 className="w-5 h-5 text-primary-300" />
+                        <span className="text-sm font-black">Revenue vs expenses breakdown</span>
                     </div>
                 </div>
 
                 {/* Status Footer */}
-                <div className="bg-indigo-50 rounded-2xl p-6 flex justify-between items-center">
-                    <div className="flex items-center space-x-3 text-indigo-700">
-                        <TrendingUp className="w-5 h-5" />
-                        <span className="font-bold">Current {period} Profit</span>
+                <div className="bg-primary-50 dark:bg-primary-500/10 rounded-2xl p-6 flex justify-between items-center border border-primary-100 dark:border-primary-500/20">
+                    <div className="flex items-center space-x-3 text-primary-700 dark:text-primary-300">
+                        <TrendingUp className="w-5 h-5 text-primary-500" />
+                        <span className="font-black uppercase tracking-widest text-sm">Current {period} Profit</span>
                     </div>
-                    <div className="text-2xl font-black text-indigo-600">
+                    <div className="text-2xl font-black text-primary-600 dark:text-primary-400">
                         {periodTotalProfit >= 0 ? '+' : ''}{formatINR(periodTotalProfit)}
                     </div>
                 </div>

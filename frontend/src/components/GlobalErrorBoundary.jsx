@@ -22,7 +22,7 @@ class GlobalErrorBoundary extends React.Component {
                     <h1 className="text-3xl text-red-500 mb-4 font-bold">Something went wrong.</h1>
                     <div className="bg-slate-900 p-6 rounded-xl border border-red-500/30 max-w-4xl w-full overflow-auto">
                         <h2 className="text-xl text-red-400 mb-2">{this.state.error?.toString()}</h2>
-                        <pre className="text-xs text-slate-400 whitespace-pre-wrap">
+                        <pre className="text-xs text-slate-300 whitespace-pre-wrap">
                             {this.state.errorInfo?.componentStack}
                         </pre>
                     </div>

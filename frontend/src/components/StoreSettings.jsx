@@ -173,30 +173,29 @@ export default function StoreSettings({ businessId, theme }) {
 
     const isDark = theme === 'dark';
     const isOwner = currentBusiness?.role === 'Owner';
-    const cardClass = `p-8 rounded-3xl ${isDark ? 'bg-slate-900/50 border border-white/5' : 'bg-white border border-slate-100'} shadow-xl transition-all duration-300`;
-    const inputClass = `w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'} focus:ring-2 focus:ring-primary-500 transition-all ${!isOwner ? 'opacity-70 cursor-not-allowed' : ''}`;
-    const btnClass = `px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${loading || !isOwner ? 'opacity-50 cursor-not-allowed' : ''}`;
+    const cardClass = `p-8 rounded-[2.5rem] border ${isDark ? 'border-white/10 bg-white/5' : 'border-slate-200 bg-slate-50/50'} transition-all duration-300 relative overflow-hidden`;
+    const inputClass = `w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-slate-800/50 border-white/10 text-slate-100' : 'bg-white border-slate-200 text-slate-800'} focus:ring-2 focus:ring-primary-500 transition-all ${!isOwner ? 'opacity-70 cursor-not-allowed' : ''}`;
+    const btnClass = `px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all duration-300 flex items-center gap-2 ${loading || !isOwner ? 'opacity-50 cursor-not-allowed' : ''}`;
 
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="glass p-10 space-y-10 animate-fade-in pb-24">
             {/* Header */}
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-slate-900 dark:text-white">Store Settings</h1>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Manage your business profile and team members</p>
+                    <h1 className="text-3xl md:text-4xl font-serif font-black tracking-tight text-slate-800 dark:text-slate-100">Store Settings</h1>
+                    <p className="text-slate-800 dark:text-slate-100/60 text-xs font-black uppercase tracking-widest mt-2 italic">Configuration & Team Governance</p>
                 </div>
             </div>
 
             {/* Navigation Pills */}
-            <div className="flex gap-4 p-2 rounded-2xl bg-slate-100/50 dark:bg-slate-800/50 w-fit">
+            <div className="flex gap-2 p-1.5 rounded-2xl bg-slate-100/50 dark:bg-white/5 w-fit border border-slate-200 dark:border-white/10">
                 {['General', 'Team', 'Account'].map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveSection(tab)}
-                        className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 ${activeSection === tab
-                            ? 'bg-white dark:bg-slate-700 shadow-md text-primary-500'
-                            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                        className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeSection === tab
+                            ? 'bg-white dark:bg-slate-800 shadow-xl text-primary-500 scale-[1.02]'
+                            : 'text-slate-800 dark:text-slate-100 hover:text-primary-500 dark:hover:text-primary-400'
                             }`}
                     >
                         {tab}
@@ -206,12 +205,12 @@ export default function StoreSettings({ businessId, theme }) {
 
             {activeSection === 'General' && (
                 <div className={cardClass}>
-                    <form onSubmit={handleUpdateSettings} className="space-y-6 max-w-2xl">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Store Name</label>
+                    <form onSubmit={handleUpdateSettings} className="space-y-8 max-w-4xl">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-100/60 ml-1">Store Name</label>
                                 <div className="relative">
-                                    <Settings className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                                    <Settings className="absolute left-3 top-3.5 w-5 h-5 text-slate-700 dark:text-slate-200" />
                                     <input
                                         type="text"
                                         value={settingsForm.name}
@@ -223,10 +222,10 @@ export default function StoreSettings({ businessId, theme }) {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Currency</label>
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-100/60 ml-1">Currency</label>
                                 <div className="relative">
-                                    <Coins className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                                    <Coins className="absolute left-3 top-3.5 w-5 h-5 text-slate-700 dark:text-slate-200" />
                                     <CustomSelect
                                         value={settingsForm.currency}
                                         onChange={(e) => setSettingsForm({ ...settingsForm, currency: e.target.value })}
@@ -237,10 +236,10 @@ export default function StoreSettings({ businessId, theme }) {
                                 </div>
                             </div>
 
-                            <div className="col-span-1 md:col-span-2 space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Primary Contact Email</label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                            <div className="col-span-1 md:col-span-2 space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-100/60 ml-1">Primary Contact Email</label>
+                                <div className="relative italic font-black">
+                                    <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-700 dark:text-slate-200" />
                                     <input
                                         type="email"
                                         value={settingsForm.email}
@@ -252,10 +251,10 @@ export default function StoreSettings({ businessId, theme }) {
                                 </div>
                             </div>
 
-                            <div className="col-span-1 md:col-span-2 space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Secondary Contact Email</label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                            <div className="col-span-1 md:col-span-2 space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-100/60 ml-1">Secondary Contact Email</label>
+                                <div className="relative italic font-black">
+                                    <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-700 dark:text-slate-200" />
                                     <input
                                         type="email"
                                         value={settingsForm.secondary_email}
@@ -267,10 +266,10 @@ export default function StoreSettings({ businessId, theme }) {
                                 </div>
                             </div>
 
-                            <div className="col-span-1 md:col-span-2 space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Business Logo URL</label>
+                            <div className="col-span-1 md:col-span-2 space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-100/60 ml-1">Business Logo URL</label>
                                 <div className="relative">
-                                    <Settings className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                                    <Settings className="absolute left-3 top-3.5 w-5 h-5 text-slate-700 dark:text-slate-200" />
                                     <input
                                         type="text"
                                         value={settingsForm.logo_url}
@@ -304,24 +303,24 @@ export default function StoreSettings({ businessId, theme }) {
                 <div className="space-y-8">
                     {/* Invite Member */}
                     <div className={cardClass}>
-                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-900 dark:text-white">
-                            <UserPlus className="w-6 h-6 text-primary-400" />
+                        <h3 className="text-xl md:text-2xl font-serif font-black mb-8 flex items-center gap-3 text-slate-800 dark:text-slate-100">
+                            <UserPlus className="w-7 h-7 text-primary-500" />
                             Invite New Member
                         </h3>
-                        <form onSubmit={handleAddMember} className="flex flex-col md:flex-row gap-4 items-end">
-                            <div className="flex-1 space-y-2 w-full">
-                                <label className="text-sm font-medium text-slate-400">Email Address</label>
+                        <form onSubmit={handleAddMember} className="flex flex-col md:flex-row gap-6 items-end">
+                            <div className="flex-1 space-y-3 w-full">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-100/60 ml-1">Email Address</label>
                                 <input
                                     type="email"
                                     value={inviteForm.email}
                                     onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
-                                    className={inputClass}
+                                    className={`${inputClass} italic font-black`}
                                     placeholder="colleague@example.com"
                                     required
                                 />
                             </div>
-                            <div className="w-full md:w-48 space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Role</label>
+                            <div className="w-full md:w-48 space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-100/60 ml-1">Role</label>
                                 <CustomSelect
                                     value={inviteForm.role}
                                     onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value })}
@@ -330,31 +329,31 @@ export default function StoreSettings({ businessId, theme }) {
                             </div>
                             <button
                                 type="submit"
-                                className={`${btnClass} bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/20 w-full md:w-auto h-[50px]`}
+                                className={`${btnClass} bg-primary-500 hover:bg-primary-600 text-white shadow-xl shadow-primary-500/20 w-full md:w-auto h-[56px]`}
                             >
-                                <UserPlus className="w-5 h-5" />
-                                Invite
+                                <UserPlus className="w-4 h-4" />
+                                <span>Invite</span>
                             </button>
                         </form>
-                        <p className="mt-4 text-sm text-slate-400 flex items-center gap-2">
-                            <Shield className="w-4 h-4" />
-                            User must already be registered on the platform to be added.
+                        <p className="mt-6 text-[10px] text-slate-800 dark:text-slate-100/50 font-black uppercase tracking-widest flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-primary-500" />
+                            User must already be registered on the platform
                         </p>
                     </div>
 
                     {/* Members List */}
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-bold px-2">Team Members ({members.length})</h3>
+                    <div className="space-y-6">
+                        <h3 className="text-xl font-black px-2 text-slate-800 dark:text-slate-100 uppercase tracking-widest text-[10px]">Team Members ({members.length})</h3>
                         <div className="grid gap-4">
                             {members.map((member) => (
-                                <div key={member.user_id} className={`${cardClass} flex flex-col md:flex-row items-center justify-between gap-6 py-6`}>
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-bold text-xl">
+                                <div key={member.user_id} className={`${cardClass} flex flex-col md:flex-row items-center justify-between gap-6 py-6 shadow-none`}>
+                                    <div className="flex items-center gap-5">
+                                        <div className="w-14 h-14 rounded-2xl bg-primary-500/10 flex items-center justify-center text-primary-500 font-black text-xl">
                                             {member.name.charAt(0).toUpperCase()}
                                         </div>
                                         <div>
-                                            <h4 className="font-semibold text-lg">{member.name}</h4>
-                                            <p className="text-slate-400 text-sm">{member.email}</p>
+                                            <h4 className="font-serif font-black text-xl text-slate-800 dark:text-slate-100">{member.name}</h4>
+                                            <p className="text-slate-800 dark:text-slate-100/60 text-xs font-black uppercase tracking-widest">{member.email}</p>
                                         </div>
                                     </div>
 
@@ -368,10 +367,10 @@ export default function StoreSettings({ businessId, theme }) {
                                             />
                                         </div>
 
-                                        {currentBusiness.role === 'Owner' && (
+                                        {currentBusiness.role === 'Owner' && member.email !== user.email && (
                                             <button
                                                 onClick={() => handleRemoveMember(member.user_id)}
-                                                className="p-3 rounded-xl bg-red-100 hover:bg-red-200 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 transition-colors"
+                                                className="p-4 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 transition-all active:scale-95"
                                                 title="Remove Member"
                                             >
                                                 <Trash2 className="w-5 h-5" />
@@ -387,36 +386,36 @@ export default function StoreSettings({ businessId, theme }) {
 
             {activeSection === 'Account' && (
                 <div className={cardClass}>
-                    <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-900 dark:text-white">
-                        <User className="w-6 h-6 text-primary-400" />
+                    <h3 className="text-xl md:text-2xl font-serif font-black mb-8 flex items-center gap-3 text-slate-800 dark:text-slate-100">
+                        <User className="w-7 h-7 text-primary-500" />
                         Personal Account Settings
                     </h3>
-                    <form onSubmit={handleUpdateProfile} className="space-y-6 max-w-2xl">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Full Name</label>
+                    <form onSubmit={handleUpdateProfile} className="space-y-8 max-w-4xl">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-100/60 ml-1">Full Name</label>
                                 <div className="relative">
-                                    <User className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                                    <User className="absolute left-3 top-3.5 w-5 h-5 text-slate-700 dark:text-slate-200" />
                                     <input
                                         type="text"
                                         value={profileForm.username}
                                         onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
-                                        className={`${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'} w-full px-4 py-3 rounded-xl border pl-10 focus:ring-2 focus:ring-primary-500 transition-all`}
+                                        className={`${inputClass} pl-10`}
                                         placeholder="Your full name"
                                         required
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Personal Registered Email</label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-100/60 ml-1">Personal Registered Email</label>
+                                <div className="relative italic font-black">
+                                    <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-700 dark:text-slate-200" />
                                     <input
                                         type="email"
                                         value={profileForm.email}
                                         onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                                        className={`${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'} w-full px-4 py-3 rounded-xl border pl-10 focus:ring-2 focus:ring-primary-500 transition-all`}
+                                        className={`${inputClass} pl-10`}
                                         placeholder="personal@email.com"
                                         required
                                     />
@@ -428,13 +427,13 @@ export default function StoreSettings({ businessId, theme }) {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/20 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`${btnClass} bg-primary-500 hover:bg-primary-600 text-white shadow-xl shadow-primary-500/20`}
                             >
                                 <Save className="w-5 h-5" />
-                                {loading ? 'Updating Profile...' : 'Update Account'}
+                                <span>{loading ? 'Updating Profile...' : 'Update Account'}</span>
                             </button>
-                            <p className="mt-4 text-xs text-slate-400 italic">
-                                Note: Changing your email will require you to log in with the new email next time.
+                            <p className="mt-6 text-[10px] text-slate-800 dark:text-slate-100/50 font-black uppercase tracking-widest italic ml-1">
+                                Note: Email changes require logging in again.
                             </p>
                         </div>
                     </form>

@@ -18,6 +18,7 @@ import {
 } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import { formatINR } from '../utils/formatCurrency';
+import { TrendingUp } from 'lucide-react';
 
 ChartJS.register(
     CategoryScale,
@@ -99,8 +100,9 @@ function Dashboard({ businessId: propBusinessId, theme }) {
     //   }
 
     const isDark = theme === 'dark';
-    const textColor = isDark ? '#cbd5e1' : '#475569';
-    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+    const textColor = isDark ? '#ffffff' : '#0f172a';
+    const subTextColor = isDark ? '#ffffff' : '#0f172a';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)';
 
     // --- CHART DATA CONFIG ---
     const chartData = {
@@ -181,12 +183,12 @@ function Dashboard({ businessId: propBusinessId, theme }) {
     };
 
     return (
-        <div className="bg-transparent font-sans text-slate-700 dark:text-slate-200 selection:bg-primary-500/30">
+        <div className="bg-transparent font-sans text-slate-900 dark:text-white selection:bg-primary-500/30">
             {/* HEADER */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-4">
                 <div>
-                    <h1 className="text-4xl md:text-5xl font-serif font-black tracking-tight text-[#0f172a] dark:text-white">Financial Insights</h1>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Real-time business performance analytics</p>
+                    <h1 className="text-4xl md:text-5xl font-serif font-black tracking-tight text-slate-900 dark:text-white">Financial Insights</h1>
+                    <p className="text-slate-900 dark:text-white text-sm font-black mt-1">Real-time business performance analytics</p>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
@@ -206,7 +208,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                                 className="px-6 py-2.5 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-2xl text-sm font-bold shadow-sm hover:bg-sky-500/20 transition-all active:scale-95 flex items-center gap-2"
                             >
                                 <span>📥</span> Export for AI
-                                <span className="text-[10px] opacity-50">▼</span>
+                                <span className="text-[10px] text-sky-300">▼</span>
                             </button>
 
                             {showExportMenu && (
@@ -225,7 +227,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                                                 downloadFile(content, `ai_export_${businessId}.${opt.ext}`, opt.type);
                                                 toast.success(`${opt.label} Downloaded`);
                                             }}
-                                            className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-sky-400 transition-colors border-b border-slate-100 dark:border-white/5 last:border-0"
+                                            className="w-full text-left px-4 py-3 text-xs font-black text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 hover:text-sky-400 transition-colors border-b border-slate-100 dark:border-white/5 last:border-0"
                                         >
                                             {opt.label}
                                         </button>
@@ -242,7 +244,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                                 className="px-6 py-2.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-2xl text-sm font-bold shadow-sm hover:bg-indigo-500/20 transition-all active:scale-95 flex items-center gap-2"
                             >
                                 <span>📊</span> Finance Reports
-                                <span className="text-[10px] opacity-50">▼</span>
+                                <span className="text-[10px] text-indigo-300">▼</span>
                             </button>
 
                             {showReportsMenu && (
@@ -265,7 +267,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                                                 console.error(err);
                                             }
                                         }}
-                                        className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-indigo-400 transition-colors border-b border-slate-100 dark:border-white/5 flex items-center gap-2"
+                                        className="w-full text-left px-4 py-3 text-xs font-black text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 hover:text-indigo-400 transition-colors border-b border-slate-100 dark:border-white/5 flex items-center gap-2"
                                     >
                                         <span>📈</span> Full Financial Pack (Excel)
                                     </button>
@@ -287,7 +289,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                                                 console.error(err);
                                             }
                                         }}
-                                        className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-indigo-400 transition-colors flex items-center gap-2"
+                                        className="w-full text-left px-4 py-3 text-xs font-black text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 hover:text-indigo-400 transition-colors flex items-center gap-2"
                                     >
                                         <span>📄</span> Managerial Summary (PDF)
                                     </button>
@@ -304,11 +306,11 @@ function Dashboard({ businessId: propBusinessId, theme }) {
             <div className="mb-10 no-print">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                     <div>
-                        <h2 className="text-xl font-serif font-bold text-slate-900 dark:text-white">Report Frequency</h2>
-                        <p className="text-slate-500 dark:text-slate-400 text-xs">Select a time range for your performance analytics.</p>
+                        <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Category Intelligence</h2>
+                        <p className="text-slate-900 dark:text-white text-sm font-medium">Neural mapping of category performance and demand variance.</p>
                     </div>
                 </div>
-                <div className="bg-slate-100 dark:bg-white/5 p-1.5 rounded-[20px] shadow-sm border border-slate-200 dark:border-white/10 flex flex-wrap gap-1">
+                <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-[20px] shadow-sm border border-slate-200 dark:border-white/10 flex flex-wrap gap-1">
                     {[
                         { key: 'daily', label: 'Daily' },
                         { key: 'weekly', label: 'Weekly' },
@@ -323,7 +325,7 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                             onClick={() => setReportGranularity(g.key)}
                             className={`px-4 md:px-5 py-2 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${reportGranularity === g.key
                                 ? 'bg-primary-500 text-white shadow-xl shadow-primary-500/20 scale-105'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-500 hover:bg-primary-500/10 dark:hover:bg-primary-500/5'
+                                : 'text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-500 hover:bg-primary-500/10 dark:hover:bg-primary-500/5'
                                 }`}
                         >
                             {g.label}
@@ -333,20 +335,20 @@ function Dashboard({ businessId: propBusinessId, theme }) {
 
                 {/* Custom Date Range Pickers */}
                 {reportGranularity === 'custom' && (
-                    <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-white/60 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
-                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 flex-shrink-0">From</span>
+                    <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-white/60 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
+                        <span className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white flex-shrink-0">From</span>
                         <input
                             type="date"
                             value={customStart}
                             onChange={(e) => setCustomStart(e.target.value)}
-                            className="px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none w-full sm:w-auto"
+                            className="px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white font-black focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none w-full sm:w-auto"
                         />
-                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 flex-shrink-0">To</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white flex-shrink-0">To</span>
                         <input
                             type="date"
                             value={customEnd}
                             onChange={(e) => setCustomEnd(e.target.value)}
-                            className="px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none w-full sm:w-auto"
+                            className="px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white font-black focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none w-full sm:w-auto"
                         />
                         {(!customStart || !customEnd) && (
                             <span className="text-[10px] text-amber-500 dark:text-amber-400 font-bold ml-1">⚠ Select both dates</span>
@@ -385,17 +387,17 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                             <div className="flex items-center space-x-3 mb-3">
                                 <span className="text-primary-400 text-[10px] font-black uppercase tracking-[0.3em]">📡 Operational Intelligence</span>
                             </div>
-                            <h3 className="text-3xl md:text-4xl font-serif text-slate-900 dark:text-white tracking-tight leading-tight">Weekly Performance Analytics</h3>
-                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-medium">Financial health overview for the current billing cycle.</p>
+                            <h3 className="text-3xl md:text-4xl font-serif text-slate-900 dark:text-white tracking-tight leading-tight font-black drop-shadow-sm">Weekly Performance <span className="text-primary-500 italic">Analytics</span></h3>
+                            <p className="text-slate-900 dark:text-white text-sm mt-3 font-black tracking-wide">Comprehensive financial health overview.</p>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="bg-slate-100/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-5 py-3 rounded-2xl flex items-center space-x-3">
+                            <div className="glass p-8 relative overflow-hidden group">
                                 <span className="text-indigo-500 text-lg">🎯</span>
                                 <div className="flex flex-col">
                                     <span className="text-slate-800 dark:text-white font-bold text-sm">
                                         {stats.net_profit > 0 ? Math.min(100, Math.round((stats.net_profit / Math.max(1, stats.total_sales)) * 100 * 3)) : 0}%
                                     </span>
-                                    <span className="text-slate-500 text-[9px] uppercase font-bold tracking-widest">Goal Status</span>
+                                    <span className="text-slate-900 dark:text-white text-[9px] uppercase font-black tracking-widest">Goal Status</span>
                                 </div>
                             </div>
                         </div>
@@ -429,9 +431,9 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                                 trend: m.growth.profit >= 0 ? 'up' : 'down'
                             }
                         ].map((stat, i) => (
-                            <div key={i} className="bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 p-5 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                            <div key={i} className="glass p-8 hover:-translate-y-1">
                                 <div className="flex items-center justify-between mb-3">
-                                    <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-widest">{stat.label}</span>
+                                    <span className="text-slate-900 dark:text-white text-[10px] uppercase font-black tracking-widest">{stat.label}</span>
                                     <span className={`text-[11px] font-black ${stat.trend === 'up' ? 'text-emerald-500' : 'text-rose-500'}`}>
                                         {stat.trend === 'up' ? '↑' : '↓'} {stat.change}
                                     </span>
@@ -446,11 +448,11 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                         <div className="absolute top-6 left-6 flex items-center space-x-6 z-10">
                             <div className="flex items-center space-x-2">
                                 <div className="w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>
-                                <span className="text-slate-700 dark:text-slate-300 text-[10px] font-black uppercase tracking-widest">Revenue</span>
+                                <span className="text-slate-900 dark:text-white text-[10px] font-black uppercase tracking-widest">Revenue</span>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-                                <span className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest">Profit</span>
+                                <span className="text-slate-900 dark:text-white text-[10px] font-black uppercase tracking-widest">Profit</span>
                             </div>
                         </div>
                         <Line
@@ -538,15 +540,15 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                 {/* MONTHLY SUMMARY (1/3 width) */}
                 <div className="bg-white/65 dark:bg-white/[0.02] backdrop-blur-[12px] p-8 rounded-3xl shadow-2xl shadow-black/5 border border-slate-200 dark:border-white/10 flex flex-col justify-between">
                     <div>
-                        <h2 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-900 dark:text-white">
+                        <h2 className="text-lg font-black mb-6 flex items-center gap-2 text-slate-900 dark:text-white">
                             <span>📊</span> Monthly Comparison
                         </h2>
 
                         <div className="space-y-6">
                             <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Sales This Month</p>
+                                <p className="text-xs text-slate-900 dark:text-white uppercase font-black mb-1">Sales This Month</p>
                                 <div className="flex items-end gap-2">
-                                    <span className="text-2xl font-bold text-slate-900 dark:text-white">{formatINR(m.this_month.sales)}</span>
+                                    <span className="text-2xl font-black text-slate-900 dark:text-white">{formatINR(m.this_month.sales)}</span>
                                     <span className={`text-xs font-bold ${m.growth.sales >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                                         {m.growth.sales >= 0 ? '↑' : '↓'} {Math.abs(m.growth.sales).toFixed(1)}%
                                     </span>
@@ -554,9 +556,9 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                             </div>
 
                             <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Net Profit This Month</p>
+                                <p className="text-xs text-slate-900 dark:text-white uppercase font-black mb-1">Net Profit This Month</p>
                                 <div className="flex items-end gap-2">
-                                    <span className="text-2xl font-bold text-slate-900 dark:text-white">{formatINR(m.this_month.profit)}</span>
+                                    <span className="text-2xl font-black text-slate-900 dark:text-white">{formatINR(m.this_month.profit)}</span>
                                     <span className={`text-xs font-bold ${m.growth.profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                                         {m.growth.profit >= 0 ? '↑' : '↓'} {Math.abs(m.growth.profit).toFixed(1)}%
                                     </span>
@@ -569,8 +571,8 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl">🤖</div>
                             <div>
-                                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Forecast Expense</p>
-                                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{formatINR(stats.prediction.expense_forecast || 0)}</p>
+                                <p className="text-[10px] text-slate-900 dark:text-white font-black uppercase tracking-wider">Forecast Expense</p>
+                                <p className="text-sm font-black text-slate-900 dark:text-white">{formatINR(stats.prediction.expense_forecast || 0)}</p>
                             </div>
                         </div>
                     </div>
@@ -579,13 +581,13 @@ function Dashboard({ businessId: propBusinessId, theme }) {
 
 
 
-            {/* FINANCIAL INTELLIGENCE HUB */}
+            {/* FINANCIAL INTELLIGENCE HUB: Expenses Anatomy + Net Profit Trend side-by-side */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-                {/* CATEGORY BREAKDOWN */}
+                {/* EXPENSES ANATOMY (1/3 width) */}
                 <div className="bg-white/65 dark:bg-white/[0.02] backdrop-blur-[12px] p-8 rounded-3xl shadow-2xl shadow-black/5 border border-slate-200 dark:border-white/10">
                     <div className="mb-8">
-                        <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white">Expense Anatomy</h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-xs">Where is your money going?</p>
+                        <h3 className="text-xl font-serif font-black tracking-tight text-slate-900 dark:text-white">Expense Anatomy</h3>
+                        <p className="text-slate-900 dark:text-white text-xs font-black">Where is your money going?</p>
                     </div>
                     <div className="h-64 relative">
                         {stats.expense_breakdown && stats.expense_breakdown.length > 0 ? (
@@ -598,56 +600,94 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                                 }}
                             />
                         ) : (
-                            <div className="h-full flex items-center justify-center text-slate-500 text-xs italic bg-slate-50 dark:bg-white/5 rounded-2xl border border-dashed border-slate-200 dark:border-white/10">No expense categories yet</div>
+                            <div className="h-full flex items-center justify-center text-slate-900 dark:text-white text-xs italic bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-white/10">No expense categories yet</div>
                         )}
                     </div>
                 </div>
 
-                {/* PROFIT TREND */}
-                <div className="bg-white/65 dark:bg-white/[0.02] backdrop-blur-[12px] p-8 rounded-3xl shadow-2xl shadow-black/5 border border-slate-200 dark:border-white/10">
-                    <div className="mb-8">
-                        <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white">Net Profit Trend</h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-xs">Last 6 months performance</p>
-                    </div>
-                    <div className="h-64">
-                        <Line data={profitTrendData} options={{ ...chartOptions, plugins: { legend: { display: false } } }} />
-                    </div>
-                </div>
-
-                {/* AI FINANCIAL BRIEFING */}
-                <div className="p-8 bg-indigo-600 text-white rounded-[32px] shadow-xl shadow-indigo-500/50 relative overflow-hidden flex flex-col justify-between">
-                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                {/* NET PROFIT TREND (2/3 width) — next to Expenses Anatomy */}
+                <div className="lg:col-span-2 bg-white/65 dark:bg-white/[0.02] backdrop-blur-[12px] p-8 rounded-3xl shadow-2xl shadow-black/5 border border-slate-200 dark:border-white/10 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[100px] -mr-32 -mt-32 transition-opacity duration-500 opacity-50 group-hover:opacity-100"></div>
                     <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-6 text-indigo-200 uppercase tracking-widest font-black text-[10px]">
-                            <span>✨</span> AI Financial Briefing
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
+                            <div>
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <div className="w-7 h-7 rounded-xl bg-primary-500/20 flex items-center justify-center text-primary-500">
+                                        <TrendingUp className="w-3.5 h-3.5" />
+                                    </div>
+                                    <span className="text-primary-400 text-[10px] font-black uppercase tracking-[0.3em]">Financial Trajectory</span>
+                                </div>
+                                <h3 className="text-xl font-serif font-black tracking-tight text-slate-900 dark:text-white">
+                                    Net Profit Trend
+                                    <span className="ml-2 text-[10px] font-black uppercase tracking-widest text-primary-400 bg-primary-500/10 px-2.5 py-1 rounded-full">
+                                        {reportGranularity.charAt(0).toUpperCase() + reportGranularity.slice(1)}
+                                    </span>
+                                </h3>
+                                <p className="text-slate-900 dark:text-white text-xs mt-1 font-black">Performance over selected period</p>
+                            </div>
                         </div>
 
-                        {stats.expense_breakdown && stats.expense_breakdown.length > 0 ? (
-                            <div className="space-y-6">
-                                <div>
-                                    <h4 className="text-xs font-bold text-indigo-200/60 uppercase mb-2">Primary Expenditure</h4>
-                                    <p className="text-2xl font-serif font-bold">
-                                        {stats.expense_breakdown.length > 0 ? [...stats.expense_breakdown].sort((a, b) => b.amount - a.amount)[0].category : 'N/A'}
-                                    </p>
-                                    <p className="text-xs text-indigo-200 mt-1">Consuming {formatINR([...stats.expense_breakdown].sort((a, b) => b.amount - a.amount)[0].amount)} this period.</p>
+                        <div className="h-[240px]">
+                            {stats.monthly_profit_trend?.labels?.length > 0 ? (
+                                <Line
+                                    data={{
+                                        labels: stats.monthly_profit_trend.labels,
+                                        datasets: [{
+                                            label: 'Net Profit',
+                                            data: stats.monthly_profit_trend.profit,
+                                            borderColor: '#10b981',
+                                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                            fill: true,
+                                            tension: 0.45,
+                                            pointRadius: 5,
+                                            pointHoverRadius: 7,
+                                            pointBackgroundColor: '#10b981',
+                                            pointBorderColor: isDark ? '#1e293b' : '#fff',
+                                            pointBorderWidth: 2,
+                                            borderWidth: 3,
+                                        }]
+                                    }}
+                                    options={{
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        interaction: { intersect: false, mode: 'index' },
+                                        plugins: {
+                                            legend: { display: false },
+                                            tooltip: {
+                                                backgroundColor: isDark ? '#1e293b' : '#fff',
+                                                titleColor: isDark ? '#f8fafc' : '#0f172a',
+                                                bodyColor: isDark ? '#94a3b8' : '#475569',
+                                                borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                                                borderWidth: 1,
+                                                padding: 12,
+                                                cornerRadius: 12,
+                                                callbacks: {
+                                                    label: (context) => ` Net Profit: ${formatINR(context.parsed.y)}`
+                                                }
+                                            }
+                                        },
+                                        scales: {
+                                            y: {
+                                                grid: { color: gridColor, drawBorder: false },
+                                                ticks: {
+                                                    color: subTextColor,
+                                                    font: { size: 10, weight: '700' },
+                                                    callback: (value) => '₹' + (value >= 1000 ? (value / 1000).toFixed(0) + 'k' : value)
+                                                }
+                                            },
+                                            x: {
+                                                grid: { display: false },
+                                                ticks: { color: subTextColor, font: { size: 10, weight: '700' } }
+                                            }
+                                        }
+                                    }}
+                                />
+                            ) : (
+                                <div className="h-full flex items-center justify-center text-slate-900 dark:text-white text-sm italic bg-slate-50/50 dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-200 dark:border-white/10">
+                                    Insufficient data for trend analysis.
                                 </div>
-
-                                <div className="p-4 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
-                                    <p className="text-xs font-medium italic leading-relaxed">
-                                        {stats.net_profit < 0
-                                            ? "⚠ Your expenses exceed revenue. Audit your primary expenditure category immediately to restore profitability."
-                                            : "✔ Your business remains profitable. Reinvest your surplus into high-velocity inventory to scale."}
-                                    </p>
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="text-xs text-indigo-100/60 italic">Waiting for more financial data to generate briefing...</p>
-                        )}
-                    </div>
-
-                    <div className="relative z-10 pt-6 mt-6 border-t border-white/10 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-indigo-200">
-                        <span>Health Score</span>
-                        <span>{stats.net_profit > 0 ? 'Good' : 'Critical'}</span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -657,14 +697,14 @@ function Dashboard({ businessId: propBusinessId, theme }) {
 
 function StatCard({ title, value, icon, color, subValue }) {
     return (
-        <div className="bg-white dark:bg-white/5 backdrop-blur-sm p-5 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 hover:shadow-md transition-all group overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-slate-100 dark:bg-white/5 rounded-full -mr-12 -mt-12 group-hover:bg-slate-200 dark:group-hover:bg-white/10 transition-colors"></div>
+        <div className="bg-white dark:bg-slate-800 backdrop-blur-sm p-5 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 hover:shadow-md transition-all group overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-slate-100 dark:bg-slate-900 rounded-full -mr-12 -mt-12 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors"></div>
             <div className="relative z-10 flex justify-between items-start mb-3">
-                <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-widest font-sans">{title}</p>
-                <span className="text-lg p-1.5 bg-slate-100 dark:bg-white/5 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0">{icon}</span>
+                <p className="text-[10px] font-black uppercase text-slate-900 dark:text-white tracking-widest font-sans">{title}</p>
+                <span className="text-lg p-1.5 bg-slate-100 dark:bg-white/10 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0">{icon}</span>
             </div>
             <p className={`text-2xl md:text-3xl font-serif font-black ${color} relative z-10 truncate`}>{value}</p>
-            {subValue && <div className="mt-2 flex items-center gap-1.5">{subValue}</div>}
+            {subValue && <div className="mt-2 flex items-center gap-1.5 font-black">{subValue}</div>}
         </div>
     );
 }

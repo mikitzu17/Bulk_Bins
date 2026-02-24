@@ -106,7 +106,7 @@ const DashboardPreview = () => {
     };
 
     return (
-        <div className="bg-white/65 dark:bg-white/65 border border-white/20 backdrop-blur-[12px] p-8 md:p-12 rounded-[3.5rem] shadow-3xl w-full max-w-[1200px] mx-auto group overflow-hidden relative">
+        <div className="glass p-8 md:p-12 w-full max-w-[1200px] mx-auto group overflow-hidden relative">
             {/* Background Glows */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[100px] -mr-32 -mt-32"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-500/5 blur-[100px] -ml-32 -mb-32"></div>
@@ -118,20 +118,19 @@ const DashboardPreview = () => {
                             <Activity className="text-primary-400 w-5 h-5 animate-pulse" />
                             <span className="text-primary-400 text-[10px] font-black uppercase tracking-[0.3em]">Operational Intelligence</span>
                         </div>
-                        <h3 className="text-2xl md:text-4xl font-serif text-[#0f172a] tracking-tight leading-tight">Weekly Performance Analytics</h3>
-                        <p className="text-slate-700 text-lg mt-3 font-semibold">Financial health overview for the current billing cycle.</p>
+                        <h3 className="text-2xl md:text-4xl font-serif font-black text-slate-900 dark:text-white tracking-tight leading-tight">Weekly Performance <span className="text-primary-500 italic">Analytics</span></h3>
+                        <p className="text-slate-900 dark:text-white text-lg mt-3 font-medium opacity-80">Financial health overview for the current billing cycle.</p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="bg-slate-100/80 border border-slate-200 px-6 py-3 rounded-2xl flex items-center space-x-3">
-                            <Target className="text-indigo-500 w-5 h-5" />
+                        <div className="nav-pills px-6 py-3 flex items-center space-x-3">
+                            <Target className="text-primary-500 w-5 h-5" />
                             <div className="flex flex-col">
-                                <span className="text-slate-800 font-bold text-sm">92%</span>
-                                <span className="text-slate-500 text-[9px] uppercase font-bold tracking-widest">Goal Status</span>
+                                <span className="text-slate-900 dark:text-white font-black text-base leading-none">92%</span>
+                                <span className="text-slate-900 dark:text-white text-[9px] uppercase font-black tracking-widest opacity-60 mt-1">Goal Status</span>
                             </div>
                         </div>
-                        <div className="bg-gradient-to-r from-primary-500 to-emerald-500 text-white px-8 py-4 rounded-2xl flex items-center space-x-3 shadow-2xl shadow-primary-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer group/btn">
-                            <span className="font-black text-xs uppercase tracking-widest">Export Report</span>
-                            <div className="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity rounded-2xl"></div>
+                        <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-8 py-4 rounded-2xl flex items-center space-x-3 shadow-xl shadow-primary-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer group/btn">
+                            <span className="font-black text-xs uppercase tracking-[0.2em]">Export Intelligence</span>
                         </div>
                     </div>
                 </div>
@@ -143,31 +142,31 @@ const DashboardPreview = () => {
                         { label: 'Op. Expenses', value: '₹28,080', change: '+4.1%', trend: 'down', icon: TrendingDown },
                         { label: 'Profit Margin', value: '30.6%', change: '-1.1%', trend: 'down', icon: Activity }
                     ].map((stat, i) => (
-                        <div key={i} className="bg-white/10 border border-white/20 p-6 rounded-[2rem] shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all group/card">
+                        <div key={i} className="glass p-6 group/card">
                             <div className="flex items-center justify-between mb-4">
-                                <div className="p-3 bg-white/20 rounded-xl text-slate-700 group-hover/card:text-primary-600 transition-colors">
-                                    <stat.icon className="w-5 h-5" />
+                                <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-900 dark:text-white transition-colors">
+                                    <stat.icon className="w-5 h-5 pointer-events-none" />
                                 </div>
-                                <div className={`flex items-center space-x-1 text-[11px] font-black ${stat.trend === 'up' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                <div className={`flex items-center space-x-1 text-[11px] font-black ${stat.trend === 'up' ? 'text-emerald-500' : 'text-rose-500'}`}>
                                     <span>{stat.change}</span>
                                     {stat.trend === 'up' ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                                 </div>
                             </div>
-                            <p className="text-slate-600 text-[10px] uppercase font-bold tracking-widest mb-1">{stat.label}</p>
-                            <p className="text-2xl md:text-3xl font-serif text-[#0f172a] font-black truncate">{stat.value}</p>
+                            <p className="text-slate-900 dark:text-white text-[10px] uppercase font-black tracking-widest mb-2 opacity-60">{stat.label}</p>
+                            <p className="text-2xl md:text-3xl font-serif font-black text-slate-900 dark:text-white truncate">{stat.value}</p>
                         </div>
                     ))}
                 </div>
 
-                <div className="relative h-[450px] w-full bg-white/10 rounded-[2.5rem] p-10 border border-white/20 shadow-inner">
+                <div className="relative h-[450px] w-full glass p-10 bg-slate-50/50 dark:bg-slate-900/50">
                     <div className="absolute top-8 left-10 flex items-center space-x-8 z-10">
                         <div className="flex items-center space-x-3">
-                            <div className="w-4 h-4 rounded-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
-                            <span className="text-[#0f172a] text-[11px] font-black uppercase tracking-widest">Revenue</span>
+                            <div className="w-3.5 h-3.5 rounded-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
+                            <span className="text-slate-900 dark:text-white text-[10px] font-black uppercase tracking-widest">Revenue</span>
                         </div>
                         <div className="flex items-center space-x-3">
-                            <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
-                            <span className="text-slate-600 text-[11px] font-black uppercase tracking-widest">Profit</span>
+                            <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+                            <span className="text-slate-900 dark:text-white text-[10px] font-black uppercase tracking-widest">Profit</span>
                         </div>
                     </div>
                     <Line data={lineData} options={lineOptions} />

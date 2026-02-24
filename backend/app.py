@@ -417,6 +417,11 @@ def get_members(business_id):
 @app.route('/api/businesses/<int:business_id>/members/<int:user_id>', methods=['PUT', 'DELETE'])
 @role_required(['Owner'])
 def manage_member(business_id, user_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user.id == user_id:
+        return jsonify({"message": "You cannot change your own role. Ask another Owner to manage your permissions."}), 400
+
     member = BusinessMember.query.filter_by(business_id=business_id, user_id=user_id).first()
     if not member:
         return jsonify({"message": "Member not found"}), 404

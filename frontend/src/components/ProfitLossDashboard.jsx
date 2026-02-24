@@ -8,15 +8,15 @@ const COLORS = ['#22d3ee', '#3b82f6', '#818cf8', '#6366f1'];
 const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly', customStart, customEnd }) => {
     if (!data || data.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 opacity-30">
+            <div className="flex flex-col items-center justify-center py-20">
                 <DollarSign className="w-16 h-16 mb-4 text-slate-400 dark:text-slate-600" />
-                <p className="font-bold uppercase tracking-widest text-xs text-slate-500 dark:text-slate-400">Insufficient data for P&L analysis</p>
+                <p className="font-bold uppercase tracking-widest text-xs text-slate-900 dark:text-white">Insufficient data for P&L analysis</p>
             </div>
         );
     }
 
     const isDark = theme === 'dark';
-    const textColor = isDark ? '#cbd5e1' : '#475569';
+    const textColor = isDark ? '#f8fafc' : '#0f172a';
     const gridColor = isDark ? '#ffffff12' : '#00000010';
     const tooltipBg = isDark ? '#0f172a' : '#ffffff';
     const tooltipBorder = isDark ? '#ffffff10' : '#e2e8f0';
@@ -85,18 +85,18 @@ const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly', custo
         <div className="space-y-12 animate-fade-in">
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="glass p-6 rounded-[2rem] border-slate-200 dark:border-white/5 bg-white/65 dark:bg-white/[0.02] backdrop-blur-[12px] shadow-xl shadow-black/5">
-                    <div className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Revenue</div>
-                    <div className="text-2xl md:text-3xl font-serif font-black text-[#0f172a] dark:text-white transition-all duration-500 truncate">{formatINR(totalSales)}</div>
+                <div className="glass p-6 bg-white/70 dark:bg-slate-900/70 border-white/20">
+                    <div className="text-slate-900 dark:text-white text-[10px] font-black uppercase tracking-widest mb-2">Total Revenue</div>
+                    <div className="text-2xl md:text-3xl font-serif font-black text-slate-900 dark:text-white transition-all duration-500 truncate drop-shadow-sm">{formatINR(totalSales)}</div>
                 </div>
                 <div className="glass p-6 rounded-[2rem] border-rose-500/20 bg-rose-500/10 backdrop-blur-[12px] shadow-xl shadow-black/5">
                     <div className="text-rose-500 dark:text-rose-400 text-[10px] font-black uppercase tracking-widest mb-2">Gross Profit</div>
                     <div className="text-2xl md:text-3xl font-serif font-black text-rose-500 dark:text-rose-400 truncate">{formatINR(grossProfit)}</div>
                     <div className="text-[8px] text-rose-500/60 font-bold uppercase mt-1 text-center">Sales - COGS</div>
                 </div>
-                <div className="glass p-6 rounded-[2rem] border-slate-200 dark:border-white/5 bg-white/65 dark:bg-white/[0.02] backdrop-blur-[12px] shadow-xl shadow-black/5">
-                    <div className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Operating Expenses</div>
-                    <div className="text-2xl md:text-3xl font-serif font-black text-slate-900 dark:text-white transition-all duration-500 truncate">{formatINR(totalExpenses)}</div>
+                <div className="glass p-6 bg-white/70 dark:bg-slate-900/70 border-white/20">
+                    <div className="text-slate-900 dark:text-white text-[10px] font-black uppercase tracking-widest mb-2">Operating Expenses</div>
+                    <div className="text-2xl md:text-3xl font-serif font-black text-slate-900 dark:text-white transition-all duration-500 truncate drop-shadow-sm">{formatINR(totalExpenses)}</div>
                 </div>
                 <div className="glass p-6 rounded-[2rem] border-primary-500/20 bg-primary-500/10 backdrop-blur-[12px] shadow-xl shadow-black/5">
                     <div className="text-primary-500 dark:text-primary-400 text-[10px] font-black uppercase tracking-widest mb-2">Net Profit</div>
@@ -109,11 +109,11 @@ const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly', custo
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 glass p-10 rounded-[3rem] border-slate-200 dark:border-white/5 h-[450px] bg-white dark:bg-white/5">
+                <div className="lg:col-span-2 glass p-8 mt-6 dark:bg-slate-800">
                     <div className="flex justify-between items-center mb-8">
                         <div>
-                            <h4 className="text-2xl font-serif font-black text-[#0f172a] dark:text-white">Profit Performance</h4>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Institutional Revenue Tracking</p>
+                            <h4 className="text-2xl font-serif font-black tracking-tight text-[#0f172a] dark:text-white">Profit Performance</h4>
+                            <p className="text-[10px] text-slate-900 dark:text-white font-bold uppercase tracking-widest mt-1">Institutional Revenue Tracking</p>
                         </div>
                         <div className={`flex items-center space-x-2 text-xs font-black uppercase tracking-widest ${netProfit >= 0 ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
                             {netProfit >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
@@ -143,9 +143,9 @@ const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly', custo
                     </div>
                 </div>
 
-                <div className="glass p-10 rounded-[3rem] border-slate-200 dark:border-white/5 h-[450px] bg-white dark:bg-white/5">
-                    <h4 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Cost Breakdown</h4>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mb-8">Profit & Inventory Analysis</p>
+                <div className="glass p-10 rounded-[3rem] border-slate-200 dark:border-white/5 h-[450px] bg-white dark:bg-slate-800">
+                    <h4 className="text-xl font-serif font-black tracking-tight text-slate-900 dark:text-white mb-2">Cost Breakdown</h4>
+                    <p className="text-[10px] text-slate-900 dark:text-white font-bold uppercase tracking-widest mb-8">Profit & Inventory Analysis</p>
                     <div className="w-full h-[230px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -172,7 +172,7 @@ const ProfitLossDashboard = ({ data, theme, reportGranularity = 'monthly', custo
                             <div key={i} className="flex items-center justify-between">
                                 <div className="flex items-center space-x-2">
                                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: i === 0 ? '#f43f5e' : '#3b82f6' }}></div>
-                                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{item.name}</span>
+                                    <span className="text-[10px] text-slate-900 dark:text-white font-black uppercase tracking-widest">{item.name}</span>
                                 </div>
                                 <span className="text-xs font-serif text-slate-900 dark:text-white">{formatINR(item.value)}</span>
                             </div>

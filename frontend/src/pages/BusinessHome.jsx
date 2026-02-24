@@ -12,13 +12,16 @@ import toast from 'react-hot-toast';
 import CustomSelect from '../components/CustomSelect';
 import ExportModal from '../components/ExportModal';
 import Logo from '../assets/logo.png';
+import FarmBg from '../assets/farm.jpg';
+import HighFidelityDashboard from '../components/HighFidelityDashboard';
+import SimpleSummaryDashboard from '../components/SimpleSummaryDashboard';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 const API_URL = `${BASE_URL}/api`;
 
 const BusinessHome = () => {
     const { id } = useParams();
-    const { businesses, currentBusiness, setCurrentBusiness, logout, token, user } = useAuth();
+    const { businesses, currentBusiness, setCurrentBusiness, logout, token, user, theme, toggleTheme } = useAuth();
     const [activeTab, setActiveTab] = useState('Overview');
     const [pnlData, setPnlData] = useState([]);
     const [aiPredictions, setAiPredictions] = useState(null);
@@ -84,21 +87,6 @@ const BusinessHome = () => {
 
     const navigate = useNavigate();
 
-    // Theme Logic
-    const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
-
-    useEffect(() => {
-        if (theme === "dark") {
-            document.documentElement.classList.add("dark");
-        } else {
-            document.documentElement.classList.remove("dark");
-        }
-        localStorage.setItem("theme", theme);
-    }, [theme]);
-
-    const toggleTheme = () => {
-        setTheme(prev => prev === "dark" ? "light" : "dark");
-    };
 
     useEffect(() => {
         console.log("BusinessHome: Checking access...", { user, businesses, id });
@@ -583,11 +571,26 @@ const BusinessHome = () => {
     };
 
     if (!currentBusiness) return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-            <div className="text-center">
-                <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                <h2 className="text-2xl font-serif text-white">Initializing Terminal...</h2>
-                <p className="text-slate-500 mt-2">Connecting to business ledger</p>
+        <div className="relative w-full min-h-screen flex items-center justify-center p-6 bg-slate-950 font-sans selection:bg-primary-500/30 overflow-hidden">
+            {/* Full-Screen Background Image with Immersive Overlay */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <img
+                    src={FarmBg}
+                    alt="Background"
+                    className="w-full h-full object-cover scale-105 opacity-30 dark:opacity-50 transition-opacity duration-300 animate-slow-zoom"
+                />
+                <div className="absolute inset-0 bg-slate-50/80 dark:bg-slate-950/70 backdrop-blur-none transition-colors duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-50/60 via-transparent to-slate-200/20 dark:from-slate-950/80 dark:via-transparent dark:to-slate-950/80 transition-colors duration-300 animate-gradient-move"></div>
+
+                {/* Animated Glow Blobs for Depth */}
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-500/10 blur-[120px] rounded-full animate-pulse"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent-500/10 blur-[120px] rounded-full animate-float"></div>
+            </div>
+
+            <div className="relative z-10 text-center animate-fade-in">
+                <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-6 shadow-[0_0_20px_rgba(74,222,128,0.3)]"></div>
+                <h2 className="text-3xl font-serif text-white tracking-tighter">Initializing <br /><span className="text-primary-400 italic">Terminal...</span></h2>
+                <p className="text-slate-900 dark:text-white mt-3 font-medium tracking-wide">Connecting to business ledger</p>
             </div>
         </div>
     );
@@ -604,14 +607,28 @@ const BusinessHome = () => {
     ].filter(item => item.roles.includes(role));
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white flex font-sans transition-colors duration-300">
+        <div className="relative min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white flex font-sans transition-colors duration-300 overflow-x-hidden">
+            {/* Full-Screen Background Image with Immersive Overlay */}
+            <div className={`fixed inset-0 z-0 pointer-events-none transition-opacity duration-700 ${overviewMode === 'Premium' && activeTab === 'Overview' ? 'opacity-0' : 'opacity-100'}`}>
+                <img
+                    src={FarmBg}
+                    alt="Background"
+                    className="w-full h-full object-cover scale-105 opacity-10 dark:opacity-20 transition-opacity duration-300 animate-slow-zoom"
+                />
+                <div className="absolute inset-0 bg-slate-50/10 dark:bg-slate-950/10 backdrop-blur-none transition-colors duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-50/40 via-transparent to-slate-200/10 dark:from-slate-950/60 dark:via-transparent dark:to-slate-950/60 transition-colors duration-300 animate-gradient-move"></div>
+
+                {/* Animated Glow Blobs for Depth */}
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-500/10 blur-[120px] rounded-full animate-pulse"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent-500/10 blur-[120px] rounded-full animate-float"></div>
+            </div>
             {/* Modal for Role Editing */}
             {isEditingRole && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
                     <div className="absolute inset-0 bg-slate-50/40 dark:bg-slate-950/40 backdrop-blur-[3px]" onClick={() => setIsEditingRole(false)}></div>
                     <div className="glass p-10 rounded-[3rem] border-primary-500/30 w-full max-w-lg relative z-10 animate-scale-in">
-                        <h2 className="text-3xl font-serif text-slate-900 dark:text-white mb-2">Change Role</h2>
-                        <p className="text-slate-500 dark:text-slate-400 mb-8">Update management access for <b>{editingMember?.name}</b></p>
+                        <h3 className="text-3xl font-serif text-slate-900 dark:text-white mb-2 underline decoration-primary-500/30">Edit Access Level</h3>
+                        <p className="text-slate-900 dark:text-white mb-8">Update management access for <b>{editingMember?.name}</b></p>
                         <form onSubmit={handleUpdateRole} className="space-y-6">
                             <div>
                                 <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">New Access Role</label>
@@ -637,7 +654,7 @@ const BusinessHome = () => {
                                 <button
                                     type="button"
                                     onClick={() => setIsEditingRole(false)}
-                                    className="bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 px-6 py-4 rounded-xl text-lg uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+                                    className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-6 py-4 rounded-xl text-lg uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
                                 >
                                     Cancel
                                 </button>
@@ -688,7 +705,7 @@ const BusinessHome = () => {
                                 <button
                                     type="button"
                                     onClick={() => setIsInviting(false)}
-                                    className="bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 px-6 py-4 rounded-xl text-lg uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+                                    className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-6 py-4 rounded-xl text-lg uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
                                 >
                                     Cancel
                                 </button>
@@ -705,7 +722,7 @@ const BusinessHome = () => {
                     <div className="glass p-10 rounded-[3rem] border-primary-500/30 w-full max-w-4xl relative z-10 animate-scale-in max-h-[90vh] overflow-y-auto no-scrollbar">
                         <div className="flex justify-between items-center mb-8">
                             <h2 className="text-3xl font-serif text-slate-900 dark:text-white">Record New Transaction</h2>
-                            <button onClick={() => setIsAddingTransaction(false)} className="text-slate-500 hover:text-white transition-colors">
+                            <button onClick={() => setIsAddingTransaction(false)} className="text-slate-900 dark:text-white hover:text-white transition-colors">
                                 <Plus className="w-8 h-8 rotate-45" />
                             </button>
                         </div>
@@ -845,7 +862,7 @@ const BusinessHome = () => {
                                                 <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">Unit Selling Price</label>
                                                 <div className="w-full bg-emerald-500/10 border border-emerald-500/20 rounded-2xl py-4 px-6 flex items-center justify-between">
                                                     <span className="text-emerald-600 dark:text-emerald-400 text-2xl font-serif font-black">₹{selectedItem.selling_price}</span>
-                                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">per unit</span>
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-900 dark:text-white">per unit</span>
                                                 </div>
                                             </div>
                                         ) : null;
@@ -884,7 +901,7 @@ const BusinessHome = () => {
                                 <button type="submit" className="flex-grow bg-primary-500 text-white py-5 rounded-2xl text-lg uppercase tracking-[0.2em] shadow-xl shadow-primary-500/20 font-black hover:bg-primary-600 transition-all active:scale-95">
                                     Finalize Entry
                                 </button>
-                                <button type="button" onClick={() => setIsAddingTransaction(false)} className="bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 px-10 py-5 rounded-2xl text-lg uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
+                                <button type="button" onClick={() => setIsAddingTransaction(false)} className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-10 py-5 rounded-2xl text-lg uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
                                     Cancel
                                 </button>
                             </div>
@@ -894,18 +911,18 @@ const BusinessHome = () => {
             )}
 
             {/* Sidebar */}
-            <aside className="w-20 md:w-72 flex flex-col items-center md:items-stretch p-3 md:p-4 gap-3 shrink-0 bg-slate-100/50 dark:bg-slate-950/50 h-screen sticky top-0 overflow-hidden">
+            <aside className="w-20 md:w-72 flex flex-col items-center md:items-stretch p-4 gap-4 shrink-0 bg-slate-100/50 dark:bg-slate-950/50 h-screen sticky top-0 overflow-hidden transition-all duration-300">
 
                 {/* Pill 1: Logo */}
-                <div className="shrink-0 bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-white/10 px-4 py-4 flex items-center space-x-3 shadow-sm">
+                <div className="shrink-0 bg-white dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-white/5 px-4 py-4 flex items-center space-x-3 shadow-xl transition-all duration-300">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
                         <img src={currentBusiness?.logo_url || Logo} alt="Logo" className="w-8 h-8 object-contain rounded-md drop-shadow-[0_5px_15px_rgba(74,222,128,0.4)]" />
                     </div>
-                    <span className="text-xl font-serif tracking-tighter hidden md:block text-slate-900 dark:text-white">BulkBins</span>
+                    <span className="text-xl font-serif font-black tracking-tighter hidden md:block text-slate-900 dark:text-white">BulkBins</span>
                 </div>
 
                 {/* Pill 2: Navigation */}
-                <div className="flex-grow bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-white/10 p-2 md:p-3 shadow-sm overflow-y-auto no-scrollbar">
+                <div className="flex-grow bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-white/10 p-2 md:p-3 shadow-sm overflow-y-auto no-scrollbar">
                     <nav className="space-y-1">
                         {navItems.map((item, i) => {
                             const isInventory = item.label === 'Inventory';
@@ -916,9 +933,9 @@ const BusinessHome = () => {
                                     key={i}
                                     id={isInventory ? 'inventory-tab-btn' : undefined}
                                     onClick={() => setActiveTab(item.label)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${activeTab === item.label
-                                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
-                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
+                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === item.label
+                                        ? 'bg-white dark:bg-slate-700 shadow-md text-primary-500'
+                                        : 'text-slate-900 dark:text-white hover:text-primary-500 dark:hover:text-primary-400'
                                         }`}
                                 >
                                     <div className="flex items-center space-x-3">
@@ -937,29 +954,29 @@ const BusinessHome = () => {
                 </div>
 
                 {/* Pill 3: Profile */}
-                <div className="shrink-0 bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-white/10 p-3 md:p-4 shadow-sm">
+                <div className="shrink-0 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-white/10 p-3 md:p-4 shadow-sm">
                     <div className="flex items-center space-x-3 mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 bg-primary-500/10 dark:bg-primary-500/20 rounded-2xl flex items-center justify-center shrink-0">
                             <span className="text-primary-600 dark:text-primary-400 text-sm font-black">
                                 {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??'}
                             </span>
                         </div>
                         <div className="hidden md:block min-w-0">
-                            <div className="text-sm font-bold text-slate-900 dark:text-white truncate">{user?.name}</div>
+                            <div className="text-sm font-black text-slate-900 dark:text-white truncate">{user?.name}</div>
                             <div className="text-[10px] font-black uppercase tracking-widest text-primary-500 dark:text-primary-400">{role}</div>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <button
                             onClick={toggleTheme}
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-all text-xs font-bold"
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-all text-xs font-bold"
                         >
                             {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                             <span className="hidden md:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
                         </button>
                         <button
                             onClick={logout}
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-200 dark:hover:border-red-500/20 transition-all text-xs font-bold"
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-200 dark:hover:border-red-500/20 transition-all text-xs font-bold"
                         >
                             <LogOut className="w-4 h-4" />
                             <span className="hidden md:inline">Sign Out</span>
@@ -975,65 +992,100 @@ const BusinessHome = () => {
                     <header className="flex items-center justify-between gap-6 mb-4">
                         <div>
                             <div className="flex items-center space-x-3 mb-1">
-                                <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${role === 'Owner' ? 'bg-primary-500/10 text-primary-400 border-primary-500/20' :
-                                    role === 'Analyst' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                        'bg-slate-500/10 text-slate-400 border-white/10'
+                                <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${role === 'Owner' || role === 'owner' ? 'bg-primary-500/10 text-primary-500 dark:text-primary-400 border-primary-500/20' :
+                                    role === 'Analyst' ? 'bg-blue-500/10 text-blue-500 dark:text-blue-400 border-blue-500/20' :
+                                        'bg-slate-500/10 text-slate-900 dark:text-white border-white/10'
                                     }`}>
                                     {role}
                                 </span>
                             </div>
-                            <h1 className="text-3xl md:text-4xl font-serif tracking-tighter text-slate-900 dark:text-white truncate">
+                            <h1 className="text-3xl md:text-4xl font-serif font-black tracking-tight text-slate-900 dark:text-white truncate">
                                 {currentBusiness.name}
                             </h1>
                         </div>
+                        {activeTab === 'Overview' && (
+                            <div className="nav-pills">
+                                {[
+                                    { id: 'Simple', label: 'Simple' },
+                                    { id: 'Standard', label: 'Standard' },
+                                    { id: 'Premium', label: 'Premium' }
+                                ].map((mode) => (
+                                    <button
+                                        key={mode.id}
+                                        onClick={() => setOverviewMode(mode.id)}
+                                        className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${overviewMode === mode.id
+                                            ? 'bg-white dark:bg-slate-700 shadow-md text-primary-500 scale-105 z-10'
+                                            : 'text-slate-900 dark:text-white hover:text-primary-500 dark:hover:text-primary-400'
+                                            }`}
+                                    >
+                                        {mode.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </header>
 
                     {activeTab === 'Overview' && (
-                        <div className="animate-in fade-in duration-500">
-                            <Dashboard businessId={id} theme={theme} />
+                        <div className={`${overviewMode === 'Premium' ? 'p-1' : 'glass p-10'} animate-in fade-in slide-in-from-bottom-4 duration-700`}>
+                            {overviewMode === 'Simple' && (
+                                <SimpleSummaryDashboard transactions={transactions} />
+                            )}
+                            {overviewMode === 'Standard' && (
+                                <Dashboard businessId={id} theme={theme} />
+                            )}
+                            {overviewMode === 'Premium' && (
+                                <HighFidelityDashboard
+                                    inventory={inventory}
+                                    transactions={transactions}
+                                    aiPredictions={aiPredictions}
+                                    pnlData={pnlData}
+                                    inventoryInsights={inventoryInsights}
+                                    profitInsights={profitInsights}
+                                />
+                            )}
                         </div>
                     )}
 
                     {activeTab === 'Analytics' && (
-                        <div className="space-y-12 pb-24">
+                        <div className="glass p-10 space-y-12 pb-24">
                             {/* AI Insights Bar */}
                             {aiPredictions && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                    <div className="glass p-6 rounded-2xl border-primary-500/20 bg-primary-500/5">
-                                        <div className="text-primary-400 text-[10px] font-black uppercase tracking-widest mb-1">7-Day Forecast</div>
-                                        <div className="text-2xl font-serif text-slate-900 dark:text-white">{formatINR(aiPredictions.predictions['7_day'])}</div>
+                                    <div className="p-6 rounded-2xl bg-primary-500/5 transition-all">
+                                        <div className="text-primary-600 dark:text-primary-400 text-[10px] font-black uppercase tracking-widest mb-1">7-Day Forecast</div>
+                                        <div className="text-2xl font-serif font-black text-slate-800 dark:text-slate-100">{formatINR(aiPredictions.predictions['7_day'])}</div>
                                     </div>
-                                    <div className="glass p-6 rounded-2xl border-blue-500/20 bg-blue-500/5">
-                                        <div className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-1">30-Day Forecast</div>
-                                        <div className="text-2xl font-serif text-slate-900 dark:text-white">{formatINR(aiPredictions.predictions['30_day'])}</div>
+                                    <div className="p-6 rounded-2xl bg-blue-500/5 transition-all">
+                                        <div className="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest mb-1">30-Day Forecast</div>
+                                        <div className="text-2xl font-serif font-black text-slate-800 dark:text-slate-100">{formatINR(aiPredictions.predictions['30_day'])}</div>
                                     </div>
                                     {aiPredictions.overspending.alert && (
-                                        <div className="glass p-6 rounded-2xl border-red-500/30 bg-red-500/10 col-span-1 md:col-span-2 flex items-center space-x-4 animate-pulse">
-                                            <div className="p-3 bg-red-500/20 rounded-2xl text-red-500 dark:text-red-400">
-                                                <AlertCircle className="w-5 h-5" />
+                                        <div className="p-6 rounded-2xl bg-red-500/5 col-span-1 md:col-span-2 flex items-center space-x-4 animate-pulse">
+                                            <div className="p-3 bg-red-500/20 rounded-2xl text-red-600 dark:text-red-400">
+                                                <AlertCircle className="w-5 h-5 transition-transform group-hover:scale-110" />
                                             </div>
                                             <div>
-                                                <div className="text-red-500 dark:text-red-400 text-[10px] font-black uppercase tracking-widest">Overspending Alert</div>
-                                                <div className="text-sm text-slate-600 dark:text-white/80">Current spending is {formatINR(aiPredictions.overspending.excess_amount)} above average.</div>
+                                                <div className="text-red-600 dark:text-red-400 text-[10px] font-black uppercase tracking-widest">Overspending Alert</div>
+                                                <div className="text-sm text-slate-800 dark:text-slate-100 font-black opacity-80">Current spending is {formatINR(aiPredictions.overspending.excess_amount)} above average.</div>
                                             </div>
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            {/* P&L Dashboard */}
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-4">
+                            {/* P&L Dashboard Header */}
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                 <div>
                                     {!showAdvancedAnalytics && (
                                         <>
-                                            <h2 className="text-2xl md:text-3xl font-serif text-slate-900 dark:text-white mb-2">Profit & Loss</h2>
-                                            <p className="text-slate-500 dark:text-slate-400 text-sm">Visualizing your financial health for the last 6 months.</p>
+                                            <h2 className="text-2xl md:text-3xl font-serif font-black tracking-tight text-slate-800 dark:text-slate-100 mb-2">Profit & Loss</h2>
+                                            <p className="text-slate-800 dark:text-slate-100 text-sm font-black">Visualizing your financial health for the last 6 months.</p>
                                         </>
                                     )}
                                 </div>
                                 <button
                                     onClick={() => setShowAdvancedAnalytics(!showAdvancedAnalytics)}
-                                    className="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white px-8 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest flex items-center space-x-3 transition-all border border-slate-200 dark:border-white/10"
+                                    className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 px-8 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest flex items-center space-x-3 transition-all border border-slate-200 dark:border-white/10"
                                 >
                                     {showAdvancedAnalytics ? (
                                         <>
@@ -1049,13 +1101,13 @@ const BusinessHome = () => {
                                 </button>
                             </div>
 
-                            {/* P&L Dashboard */}
-                            <div className="glass p-8 md:p-12 rounded-2xl border-slate-200 dark:border-white/5">
+                            {/* P&L Dashboard Container */}
+                            <div className="rounded-2xl transition-all">
 
                                 {/* Report Frequency Toggle */}
                                 {!showAdvancedAnalytics && pnlData && pnlData.length > 0 && (
                                     <div className="mb-8">
-                                        <div className="bg-slate-100 dark:bg-white/5 p-1.5 rounded-[20px] shadow-sm border border-slate-200 dark:border-white/10 flex flex-wrap gap-1">
+                                        <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-[20px] shadow-sm border border-slate-200 dark:border-white/10 flex flex-wrap gap-1">
                                             {[
                                                 { key: 'daily', label: 'Daily' },
                                                 { key: 'weekly', label: 'Weekly' },
@@ -1070,7 +1122,7 @@ const BusinessHome = () => {
                                                     onClick={() => setReportGranularity(g.key)}
                                                     className={`px-4 md:px-5 py-2 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${reportGranularity === g.key
                                                         ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
-                                                        : 'text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-500 hover:bg-primary-500/10 dark:hover:bg-primary-500/5'
+                                                        : 'text-slate-800 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-500 hover:bg-primary-500/10 dark:hover:bg-primary-500/5'
                                                         }`}
                                                 >
                                                     {g.label}
@@ -1078,11 +1130,11 @@ const BusinessHome = () => {
                                             ))}
                                         </div>
                                         {reportGranularity === 'custom' && (
-                                            <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-white/60 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
-                                                <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 flex-shrink-0">From</span>
-                                                <input type="date" value={pnlCustomStart} onChange={(e) => setPnlCustomStart(e.target.value)} className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" />
-                                                <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 flex-shrink-0">To</span>
-                                                <input type="date" value={pnlCustomEnd} onChange={(e) => setPnlCustomEnd(e.target.value)} className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" />
+                                            <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-white/60 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
+                                                <span className="text-xs font-bold uppercase tracking-widest text-slate-800 dark:text-slate-100 flex-shrink-0">From</span>
+                                                <input type="date" value={pnlCustomStart} onChange={(e) => setPnlCustomStart(e.target.value)} className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" />
+                                                <span className="text-xs font-bold uppercase tracking-widest text-slate-800 dark:text-slate-100 flex-shrink-0">To</span>
+                                                <input type="date" value={pnlCustomEnd} onChange={(e) => setPnlCustomEnd(e.target.value)} className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" />
                                             </div>
                                         )}
                                     </div>
@@ -1097,17 +1149,17 @@ const BusinessHome = () => {
                         </div>
                     )}
                     {activeTab === 'AI Prediction' && (
-                        <div className="pb-24">
+                        <div className="glass p-10 pb-24">
                             <AiForecast businessId={id} token={token} theme={theme} />
                         </div>
                     )}
 
                     {activeTab === 'Inventory' && (
-                        <div className="space-y-12 pb-24">
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                        <div className="glass p-10 space-y-12 pb-24">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div>
-                                    <h2 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-slate-900 dark:text-white">Inventory Management</h2>
-                                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Centralized Asset Ledger</p>
+                                    <h2 className="text-2xl md:text-3xl font-serif font-black tracking-tight text-slate-800 dark:text-slate-100">Inventory Management</h2>
+                                    <p className="text-slate-800 dark:text-slate-100 text-sm font-black mt-1">Centralized Asset Ledger</p>
                                 </div>
                                 <div className="relative w-full md:w-80">
                                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -1116,7 +1168,7 @@ const BusinessHome = () => {
                                         placeholder="Search by name, category…"
                                         value={inventorySearch}
                                         onChange={(e) => setInventorySearch(e.target.value)}
-                                        className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-white font-semibold placeholder:text-slate-400 focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/10 transition-all"
+                                        className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-800 dark:text-slate-100 font-semibold placeholder:text-slate-400 focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/10 transition-all font-bold"
                                     />
                                     {inventorySearch && (
                                         <button
@@ -1131,7 +1183,7 @@ const BusinessHome = () => {
 
                             {/* Add/Edit Product Form */}
                             {(role === 'Owner' || role === 'Accountant') && (
-                                <div className="glass p-8 md:p-10 rounded-2xl border-slate-200 dark:border-white/5 bg-white dark:bg-white/[0.02] shadow-2xl relative overflow-hidden group">
+                                <div className="p-8 md:p-10 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/30 relative overflow-hidden group">
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[100px] -mr-32 -mt-32"></div>
                                     <div className="flex justify-between items-center mb-8 relative">
                                         <div className="flex items-center space-x-4">
@@ -1139,8 +1191,8 @@ const BusinessHome = () => {
                                                 <Package className="w-6 h-6" />
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-serif text-slate-900 dark:text-white">{isEditingItem ? 'Edit Product' : 'Add New Item'}</h3>
-                                                <p className="text-slate-500 dark:text-slate-400 text-[9px] uppercase tracking-widest font-black">Configure item specifications</p>
+                                                <h3 className="text-xl font-serif font-black tracking-tight text-slate-800 dark:text-slate-100">{isEditingItem ? 'Edit Product' : 'Add New Item'}</h3>
+                                                <p className="text-slate-800 dark:text-slate-100 text-[9px] uppercase tracking-widest font-black">Configure item specifications</p>
                                             </div>
                                         </div>
                                         {isEditingItem && (
@@ -1150,7 +1202,7 @@ const BusinessHome = () => {
                                                     setEditingItem(null);
                                                     setNewItem({ name: '', stock_quantity: 0, selling_price: 0, cost_price: 0, reorder_level: 5, category: 'Produce', description: '', lead_time: 7 });
                                                 }}
-                                                className="text-xs text-slate-500 hover:text-white uppercase tracking-widest font-bold transition-colors"
+                                                className="text-xs text-slate-800 dark:text-slate-100 hover:text-primary-500 uppercase tracking-widest font-bold transition-colors"
                                             >
                                                 Cancel Edit
                                             </button>
@@ -1191,7 +1243,7 @@ const BusinessHome = () => {
                                             <input
                                                 type="text"
                                                 placeholder="e.g. Organic Tomatoes"
-                                                className="w-full bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-900 dark:text-white text-sm focus:border-primary-500/50 transition-all font-bold"
+                                                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-800 dark:text-slate-100 text-sm focus:border-primary-500/50 transition-all font-bold"
                                                 value={newItem.name}
                                                 onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
                                                 required
@@ -1212,7 +1264,7 @@ const BusinessHome = () => {
                                             <input
                                                 type="text"
                                                 placeholder="Brief details..."
-                                                className="w-full bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-900 dark:text-white text-sm focus:border-primary-500/50 transition-all font-bold"
+                                                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-800 dark:text-slate-100 text-sm focus:border-primary-500/50 transition-all font-bold"
                                                 value={newItem.description || ''}
                                                 onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
                                             />
@@ -1222,7 +1274,7 @@ const BusinessHome = () => {
                                             <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">Selling Price</label>
                                             <input
                                                 type="number"
-                                                className="w-full bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-900 dark:text-white text-sm font-bold focus:border-primary-500/50 transition-all"
+                                                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-800 dark:text-slate-100 text-sm font-bold focus:border-primary-500/50 transition-all"
                                                 value={newItem.selling_price}
                                                 onChange={(e) => setNewItem({ ...newItem, selling_price: parseFloat(e.target.value) || 0 })}
                                                 required
@@ -1233,7 +1285,7 @@ const BusinessHome = () => {
                                             <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">Cost Price</label>
                                             <input
                                                 type="number"
-                                                className="w-full bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-900 dark:text-white text-sm font-bold focus:border-primary-500/50 transition-all"
+                                                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-800 dark:text-slate-100 text-sm font-bold focus:border-primary-500/50 transition-all"
                                                 value={newItem.cost_price}
                                                 onChange={(e) => setNewItem({ ...newItem, cost_price: parseFloat(e.target.value) || 0 })}
                                                 required
@@ -1244,7 +1296,7 @@ const BusinessHome = () => {
                                             <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">Stock (Qty)</label>
                                             <input
                                                 type="number"
-                                                className="w-full bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-900 dark:text-white text-sm font-bold focus:border-primary-500/50 transition-all"
+                                                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-800 dark:text-slate-100 text-sm font-bold focus:border-primary-500/50 transition-all"
                                                 value={newItem.stock_quantity}
                                                 onChange={(e) => setNewItem({ ...newItem, stock_quantity: parseInt(e.target.value) || 0 })}
                                                 required
@@ -1255,7 +1307,7 @@ const BusinessHome = () => {
                                             <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">Min Alert</label>
                                             <input
                                                 type="number"
-                                                className="w-full bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-900 dark:text-white text-sm font-bold focus:border-primary-500/50 transition-all"
+                                                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-800 dark:text-slate-100 text-sm font-bold focus:border-primary-500/50 transition-all"
                                                 value={newItem.reorder_level}
                                                 onChange={(e) => setNewItem({ ...newItem, reorder_level: parseInt(e.target.value) || 5 })}
                                             />
@@ -1265,7 +1317,7 @@ const BusinessHome = () => {
                                             <label className="text-[10px] uppercase tracking-widest text-primary-400 font-black mb-3 block ml-4">Lead (Days)</label>
                                             <input
                                                 type="number"
-                                                className="w-full bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-900 dark:text-white text-sm font-bold focus:border-primary-500/50 transition-all"
+                                                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-slate-800 dark:text-slate-100 text-sm font-bold focus:border-primary-500/50 transition-all"
                                                 value={newItem.lead_time || 7}
                                                 onChange={(e) => setNewItem({ ...newItem, lead_time: parseInt(e.target.value) || 7 })}
                                             />
@@ -1306,151 +1358,153 @@ const BusinessHome = () => {
                                 return (
                                     <div key={idx} className="space-y-6">
                                         <div className="flex items-center space-x-4">
-                                            <div className="w-12 h-12 glass rounded-2xl flex items-center justify-center text-xl border-slate-200 dark:border-white/5">
+                                            <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-xl border border-slate-200 dark:border-white/10">
                                                 {section.icon}
                                             </div>
-                                            <h3 className="text-3xl font-serif text-slate-900 dark:text-white">{section.title}</h3>
+                                            <h3 className="text-3xl font-serif font-black tracking-tight text-slate-800 dark:text-slate-100">{section.title}</h3>
                                         </div>
 
-                                        <div className="glass rounded-2xl border-slate-200 dark:border-white/5 overflow-hidden shadow-2xl">
-                                            <table className="w-full text-left">
-                                                <thead>
-                                                    <tr className="bg-slate-50 dark:bg-white/[0.02] border-b border-slate-200 dark:border-white/5">
-                                                        <th className="p-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Item Details</th>
-                                                        <th className="p-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Financials</th>
-                                                        <th className="p-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Performance</th>
-                                                        <th className="p-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Availability</th>
-                                                        {(role === 'Owner' || role === 'Accountant') && (
-                                                            <th className="p-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-right">Actions</th>
-                                                        )}
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-slate-100 dark:divide-white/[0.02]">
-                                                    {paginatedProducts.length === 0 ? (
-                                                        <tr>
-                                                            <td colSpan="5" className="p-20 text-center text-slate-500 dark:text-slate-600 font-serif italic text-lg opacity-50">
-                                                                No catalog entries found for this section...
-                                                            </td>
+                                        <div className="rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl bg-white/40 dark:bg-slate-900/40">
+                                            <div className="overflow-x-auto no-scrollbar">
+                                                <table className="w-full text-left min-w-[800px]">
+                                                    <thead>
+                                                        <tr className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-white/10">
+                                                            <th className="p-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-100">Item Details</th>
+                                                            <th className="p-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-100">Financials</th>
+                                                            <th className="p-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-100">Performance</th>
+                                                            <th className="p-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-100">Availability</th>
+                                                            {(role === 'Owner' || role === 'Accountant') && (
+                                                                <th className="p-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-100 text-right">Actions</th>
+                                                            )}
                                                         </tr>
-                                                    ) : (
-                                                        paginatedProducts.map(item => (
-                                                            <tr key={item.id} className="group hover:bg-slate-50 dark:hover:bg-white/[0.01] transition-colors border-slate-200 dark:border-white/5">
-                                                                <td className="p-8">
-                                                                    <div className="flex items-center space-x-3 mb-1">
-                                                                        <div className="text-xl font-serif text-slate-900 dark:text-white group-hover:text-primary-400 transition-colors uppercase tracking-tight">{item.name}</div>
-                                                                        {item.stock_quantity <= (item.reorder_level || 5) && (
-                                                                            <span className="px-2 py-0.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full animate-pulse">Low Stock</span>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest line-clamp-1">{item.description || item.category}</div>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                        {paginatedProducts.length === 0 ? (
+                                                            <tr>
+                                                                <td colSpan="5" className="p-20 text-center text-slate-900 dark:text-white font-serif italic text-lg">
+                                                                    No catalog entries found for this section...
                                                                 </td>
-                                                                <td className="p-8">
-                                                                    <div className="text-xl font-serif text-primary-400 mb-1">{formatINR(item.selling_price)}</div>
-                                                                    <div className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">Basic Cost: {formatINR(item.cost_price || 0)}</div>
-                                                                </td>
-                                                                <td className="p-8">
-                                                                    <div className="text-sm font-bold text-slate-900 dark:text-white mb-1">{formatINR(item.selling_price - (item.cost_price || 0))} Profit</div>
-                                                                    <div className="flex items-center space-x-2">
-                                                                        <span className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">ROI:</span>
-                                                                        <span className={`text-[10px] font-black ${item.cost_price > 0 && (item.selling_price - item.cost_price) / item.cost_price > 0.5 ? 'text-green-400' : 'text-slate-400'}`}>
-                                                                            {item.cost_price > 0 ? (((item.selling_price - item.cost_price) / item.cost_price) * 100).toFixed(0) : '0'}%
-                                                                        </span>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="p-8">
-                                                                    <div className="flex flex-col space-y-2">
-                                                                        <div className="flex items-center space-x-3">
-                                                                            <div className="w-20 h-1.5 bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
-                                                                                <div
-                                                                                    className={`h-full transition-all duration-1000 ${item.stock_quantity > item.reorder_level ? 'bg-primary-500' : 'bg-red-500'}`}
-                                                                                    style={{ width: `${Math.min(100, (item.stock_quantity / Math.max(1, item.reorder_level * 3)) * 100)}%` }}
-                                                                                ></div>
-                                                                            </div>
-                                                                            <span className={`text-xs font-black ${item.stock_quantity > item.reorder_level ? 'text-primary-400' : 'text-red-500'}`}>
-                                                                                {item.stock_quantity}
+                                                            </tr>
+                                                        ) : (
+                                                            paginatedProducts.map(item => (
+                                                                <tr key={item.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors border-slate-200 dark:border-white/10">
+                                                                    <td className="p-8">
+                                                                        <div className="flex items-center space-x-3 mb-1">
+                                                                            <div className="text-xl font-serif text-slate-800 dark:text-slate-100 group-hover:text-primary-500 transition-colors uppercase tracking-tight">{item.name}</div>
+                                                                            {item.stock_quantity <= (item.reorder_level || 5) && (
+                                                                                <span className="px-2 py-0.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full animate-pulse">Low Stock</span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="text-[10px] text-slate-800 dark:text-slate-100 font-bold uppercase tracking-widest line-clamp-1 opacity-70">{item.description || item.category}</div>
+                                                                    </td>
+                                                                    <td className="p-8">
+                                                                        <div className="text-xl font-serif text-primary-500 mb-1">{formatINR(item.selling_price)}</div>
+                                                                        <div className="text-[9px] text-slate-800 dark:text-slate-100 font-black uppercase tracking-tighter opacity-80">Basic Cost: {formatINR(item.cost_price || 0)}</div>
+                                                                    </td>
+                                                                    <td className="p-8">
+                                                                        <div className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">{formatINR(item.selling_price - (item.cost_price || 0))} Profit</div>
+                                                                        <div className="flex items-center space-x-2">
+                                                                            <span className="text-[9px] text-slate-800 dark:text-slate-100 font-black uppercase tracking-tighter opacity-70">ROI:</span>
+                                                                            <span className={`text-[10px] font-black ${item.cost_price > 0 && (item.selling_price - item.cost_price) / item.cost_price > 0.5 ? 'text-green-500' : 'text-slate-500'}`}>
+                                                                                {item.cost_price > 0 ? (((item.selling_price - item.cost_price) / item.cost_price) * 100).toFixed(0) : '0'}%
                                                                             </span>
                                                                         </div>
-                                                                        {item.stock_quantity <= item.reorder_level && (
-                                                                            <div className="flex items-center space-x-2 text-rose-500 animate-pulse">
-                                                                                <AlertCircle className="w-3 h-3" />
-                                                                                <span className="text-[8px] font-black uppercase tracking-widest">Restock Required</span>
+                                                                    </td>
+                                                                    <td className="p-8">
+                                                                        <div className="flex flex-col space-y-2">
+                                                                            <div className="flex items-center space-x-3">
+                                                                                <div className="w-20 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                                                    <div
+                                                                                        className={`h-full transition-all duration-1000 ${item.stock_quantity > item.reorder_level ? 'bg-primary-500' : 'bg-red-500'}`}
+                                                                                        style={{ width: `${Math.min(100, (item.stock_quantity / Math.max(1, item.reorder_level * 3)) * 100)}%` }}
+                                                                                    ></div>
+                                                                                </div>
+                                                                                <span className={`text-xs font-black ${item.stock_quantity > item.reorder_level ? 'text-primary-500' : 'text-red-500'}`}>
+                                                                                    {item.stock_quantity}
+                                                                                </span>
                                                                             </div>
-                                                                        )}
-                                                                    </div>
-                                                                </td>
-                                                                {(role === 'Owner' || role === 'Accountant') && (
-                                                                    <td className="p-8 text-right">
-                                                                        <div className="flex justify-end space-x-4 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                                                                            <button
-                                                                                onClick={() => {
-                                                                                    setEditingItem(item);
-                                                                                    setIsEditingItem(true);
-                                                                                    setNewItem({
-                                                                                        name: item.name,
-                                                                                        category: item.category,
-                                                                                        description: item.description || '',
-                                                                                        selling_price: item.selling_price,
-                                                                                        cost_price: item.cost_price || 0,
-                                                                                        stock_quantity: item.stock_quantity,
-                                                                                        reorder_level: item.reorder_level || 5,
-                                                                                        lead_time: item.lead_time || 7
-                                                                                    });
-                                                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                                                                }}
-                                                                                className="p-3 bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-primary-400 hover:bg-primary-500/10 rounded-xl transition-all"
-                                                                            >
-                                                                                <Settings className="w-4 h-4" />
-                                                                            </button>
-                                                                            {role === 'Owner' && (
-                                                                                <button
-                                                                                    onClick={async () => {
-                                                                                        if (!confirm('Archive this item from inventory?')) return;
-                                                                                        try {
-                                                                                            const response = await fetch(`${API_URL}/businesses/${id}/inventory/${item.id}`, {
-                                                                                                method: 'DELETE',
-                                                                                                headers: { 'Authorization': `Bearer ${token}` }
-                                                                                            });
-                                                                                            if (response.ok) {
-                                                                                                toast.success('Item archived');
-                                                                                                fetchInventory();
-                                                                                            }
-                                                                                        } catch (e) { toast.error('Archiving failed'); }
-                                                                                    }}
-                                                                                    className="p-3 bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
-                                                                                >
-                                                                                    <Plus className="w-4 h-4 rotate-45" />
-                                                                                </button>
+                                                                            {item.stock_quantity <= item.reorder_level && (
+                                                                                <div className="flex items-center space-x-2 text-rose-500 animate-pulse">
+                                                                                    <AlertCircle className="w-3 h-3" />
+                                                                                    <span className="text-[8px] font-black uppercase tracking-widest">Restock Required</span>
+                                                                                </div>
                                                                             )}
                                                                         </div>
                                                                     </td>
-                                                                )}
-                                                            </tr>
-                                                        ))
-                                                    )}
-                                                </tbody>
-                                            </table>
+                                                                    {(role === 'Owner' || role === 'Accountant') && (
+                                                                        <td className="p-8 text-right">
+                                                                            <div className="flex justify-end space-x-4 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        setEditingItem(item);
+                                                                                        setIsEditingItem(true);
+                                                                                        setNewItem({
+                                                                                            name: item.name,
+                                                                                            category: item.category,
+                                                                                            description: item.description || '',
+                                                                                            selling_price: item.selling_price,
+                                                                                            cost_price: item.cost_price || 0,
+                                                                                            stock_quantity: item.stock_quantity,
+                                                                                            reorder_level: item.reorder_level || 5,
+                                                                                            lead_time: item.lead_time || 7
+                                                                                        });
+                                                                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                                                    }}
+                                                                                    className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-primary-400 hover:bg-primary-500/10 rounded-xl transition-all"
+                                                                                >
+                                                                                    <Settings className="w-4 h-4" />
+                                                                                </button>
+                                                                                {role === 'Owner' && (
+                                                                                    <button
+                                                                                        onClick={async () => {
+                                                                                            if (!confirm('Archive this item from inventory?')) return;
+                                                                                            try {
+                                                                                                const response = await fetch(`${API_URL}/businesses/${id}/inventory/${item.id}`, {
+                                                                                                    method: 'DELETE',
+                                                                                                    headers: { 'Authorization': `Bearer ${token}` }
+                                                                                                });
+                                                                                                if (response.ok) {
+                                                                                                    toast.success('Item archived');
+                                                                                                    fetchInventory();
+                                                                                                }
+                                                                                            } catch (e) { toast.error('Archiving failed'); }
+                                                                                        }}
+                                                                                        className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
+                                                                                    >
+                                                                                        <Plus className="w-4 h-4 rotate-45" />
+                                                                                    </button>
+                                                                                )}
+                                                                            </div>
+                                                                        </td>
+                                                                    )}
+                                                                </tr>
+                                                            ))
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
 
                                             {/* Category Pagination */}
                                             {products.length > itemsPerPage && (
-                                                <div className="px-6 py-4 bg-slate-50 dark:bg-white/[0.02] border-t border-slate-200 dark:border-white/5 flex items-center justify-between">
-                                                    <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                                                <div className="px-6 py-4 bg-slate-50/50 dark:bg-white/[0.02] border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
+                                                    <div className="text-sm text-slate-800 dark:text-slate-100 font-medium">
                                                         {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, products.length)} of {products.length} items
                                                     </div>
-                                                    <div className="flex items-center space-x-2">
+                                                    <div className="flex items-center gap-2">
                                                         <button
                                                             onClick={() => setInventoryPages({ ...inventoryPages, [section.key]: Math.max(1, currentPage - 1) })}
                                                             disabled={currentPage === 1}
-                                                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-white/10 transition-all"
+                                                            className="px-3 py-1.5 rounded-lg text-xs font-black bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-slate-800 dark:text-slate-100"
                                                         >
                                                             Prev
                                                         </button>
-                                                        <div className="text-xs font-bold text-slate-700 dark:text-slate-300 px-2">
+                                                        <div className="text-xs font-black text-slate-800 dark:text-slate-100 px-2">
                                                             {currentPage} / {totalPages}
                                                         </div>
                                                         <button
                                                             onClick={() => setInventoryPages({ ...inventoryPages, [section.key]: Math.min(totalPages, currentPage + 1) })}
                                                             disabled={currentPage === totalPages}
-                                                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-white/10 transition-all"
+                                                            className="px-3 py-1.5 rounded-lg text-xs font-black bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-slate-800 dark:text-slate-100"
                                                         >
                                                             Next
                                                         </button>
@@ -1465,11 +1519,11 @@ const BusinessHome = () => {
                     )}
 
                     {activeTab === 'Transactions' && (
-                        <div className="space-y-8">
+                        <div className="glass p-10 space-y-8">
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
                                 <div>
-                                    <h2 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-slate-900 dark:text-white">Financial Ledger</h2>
-                                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Live Transaction Stream</p>
+                                    <h2 className="text-2xl md:text-3xl font-serif font-black tracking-tight text-slate-800 dark:text-slate-100">Transaction Logs</h2>
+                                    <p className="text-slate-800 dark:text-slate-100 text-sm font-black mt-1">Live Transaction Stream</p>
                                 </div>
                                 <div className="flex flex-wrap gap-3">
                                     {(role === 'Owner' || role === 'Accountant' || role === 'Analyst' || role === 'owner') && (
@@ -1477,7 +1531,7 @@ const BusinessHome = () => {
                                             {/* Export Button */}
                                             <button
                                                 onClick={() => setShowExportModal(true)}
-                                                className="bg-white dark:bg-white/5 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 px-6 py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-black hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 flex items-center space-x-3"
+                                                className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-white/10 px-6 py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-black hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 flex items-center space-x-3"
                                             >
                                                 <Download className="w-4 h-4" />
                                                 <span>Export</span>
@@ -1494,7 +1548,7 @@ const BusinessHome = () => {
                                                 />
                                                 <button
                                                     onClick={() => importInputRef.current.click()}
-                                                    className="bg-white dark:bg-white/5 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 px-6 py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-black hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 flex items-center space-x-3"
+                                                    className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-white/10 px-6 py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-black hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 flex items-center space-x-3"
                                                 >
                                                     <Upload className="w-4 h-4" />
                                                     <span>Import</span>
@@ -1525,14 +1579,14 @@ const BusinessHome = () => {
                                     return (
                                         <>
                                             {paginatedTransactions.map(txn => (
-                                                <div key={txn.id} className="glass p-6 rounded-2xl border-slate-200 dark:border-white/5 flex items-center justify-between hover:border-slate-300 dark:hover:border-white/10 transition-colors group">
+                                                <div key={txn.id} className="p-6 rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between hover:border-primary-500/30 transition-all group bg-slate-50/50 dark:bg-white/5">
                                                     <div className="flex items-center space-x-6">
-                                                        <div className={`p-4 rounded-2xl ${txn.type === 'Sale' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                                                        <div className={`p-4 rounded-2xl ${txn.type === 'Sale' ? 'bg-green-500/10 text-green-500' : 'bg-rose-500/10 text-rose-500'}`}>
                                                             {txn.type === 'Sale' ? <TrendingUp className="w-6 h-6" /> : <TrendingUp className="w-6 h-6 rotate-180" />}
                                                         </div>
                                                         <div>
-                                                            <div className="text-slate-900 dark:text-white text-lg font-medium">{txn.description || txn.category}</div>
-                                                            <div className="text-slate-500 text-xs font-medium uppercase tracking-widest flex items-center">
+                                                            <div className="text-slate-800 dark:text-slate-100 text-lg font-black">{txn.description || txn.category}</div>
+                                                            <div className="text-slate-800 dark:text-slate-100 text-xs font-black uppercase tracking-widest flex items-center opacity-70">
                                                                 {new Date(txn.timestamp).toLocaleDateString()} • {txn.category}
                                                                 {txn.receipt_url && (
                                                                     <div className="flex items-center ml-4 space-x-3">
@@ -1546,7 +1600,7 @@ const BusinessHome = () => {
                                                     </div>
                                                     <div className="flex items-center space-x-6">
                                                         <div className="text-right mr-4">
-                                                            <div className={`text-2xl font-serif ${txn.type === 'Sale' ? 'text-green-400' : 'text-red-400'}`}>
+                                                            <div className={`text-2xl font-serif font-black ${txn.type === 'Sale' ? 'text-green-500' : 'text-rose-500'}`}>
                                                                 {txn.type === 'Sale' ? '+' : '-'}{formatINR(txn.amount)}
                                                             </div>
                                                             {txn.profit !== undefined && (
@@ -1555,7 +1609,7 @@ const BusinessHome = () => {
                                                                 </div>
                                                             )}
                                                             {txn.type === 'Sale' && txn.quantity > 1 && (
-                                                                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Qty: {txn.quantity}</div>
+                                                                <div className="text-[10px] text-slate-900 dark:text-white font-black uppercase tracking-widest">Qty: {txn.quantity}</div>
                                                             )}
                                                         </div>
                                                         {(role === 'Owner' || role === 'Accountant' || role === 'Analyst' || role === 'owner') && (
@@ -1573,13 +1627,13 @@ const BusinessHome = () => {
                                                                         });
                                                                         setIsEditingTransaction(true);
                                                                     }}
-                                                                    className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                                                                    className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-900 dark:text-white hover:text-slate-900 dark:hover:text-white transition-colors"
                                                                 >
                                                                     <Settings className="w-4 h-4" />
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleDeleteTransaction(txn.id)}
-                                                                    className="p-2 hover:bg-red-500/10 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
+                                                                    className="p-2 hover:bg-red-500/10 rounded-lg text-slate-900 dark:text-white hover:text-red-400 transition-colors"
                                                                 >
                                                                     <Plus className="w-4 h-4 rotate-45" />
                                                                 </button>
@@ -1589,7 +1643,7 @@ const BusinessHome = () => {
                                                 </div>
                                             ))}
                                             {paginatedTransactions.length === 0 && (
-                                                <div className="py-20 text-center opacity-30">
+                                                <div className="py-20 text-center">
                                                     <DollarSign className="w-16 h-16 mx-auto mb-4" />
                                                     <p className="font-bold uppercase tracking-widest text-xs">No transactions recorded yet</p>
                                                 </div>
@@ -1597,26 +1651,26 @@ const BusinessHome = () => {
 
                                             {/* Pagination Controls */}
                                             {transactions.length > transactionsPerPage && (
-                                                <div className="glass p-6 rounded-2xl border-slate-200 dark:border-white/5 flex items-center justify-between mt-6">
-                                                    <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
-                                                        Showing {((transactionPage - 1) * transactionsPerPage) + 1}-{Math.min(transactionPage * transactionsPerPage, transactions.length)} of {transactions.length} transactions
+                                                <div className="p-6 rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between mt-6 bg-slate-50/50 dark:bg-white/5">
+                                                    <div className="text-sm text-slate-800 dark:text-slate-100 font-black">
+                                                        Showing {((transactionPage - 1) * transactionsPerPage) + 1}-{Math.min(transactionPage * transactionsPerPage, transactions.length)} of {transactions.length}
                                                     </div>
                                                     <div className="flex items-center space-x-2">
                                                         <button
                                                             onClick={() => setTransactionPage(p => Math.max(1, p - 1))}
                                                             disabled={transactionPage === 1}
-                                                            className="px-4 py-2 rounded-xl text-sm font-bold bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-white/10 transition-all"
+                                                            className="px-4 py-2 rounded-xl text-sm font-black bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-700 transition-all text-slate-800 dark:text-slate-100"
                                                         >
-                                                            Previous
+                                                            Prev
                                                         </button>
                                                         <div className="flex space-x-1">
                                                             {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
                                                                 <button
                                                                     key={pageNum}
                                                                     onClick={() => setTransactionPage(pageNum)}
-                                                                    className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${pageNum === transactionPage
-                                                                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
-                                                                        : 'bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10'
+                                                                    className={`w-10 h-10 rounded-xl text-sm font-black transition-all ${pageNum === transactionPage
+                                                                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20 px-4'
+                                                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-slate-700'
                                                                         }`}
                                                                 >
                                                                     {pageNum}
@@ -1626,7 +1680,7 @@ const BusinessHome = () => {
                                                         <button
                                                             onClick={() => setTransactionPage(p => Math.min(totalPages, p + 1))}
                                                             disabled={transactionPage === totalPages}
-                                                            className="px-4 py-2 rounded-xl text-sm font-bold bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-white/10 transition-all"
+                                                            className="px-4 py-2 rounded-xl text-sm font-black bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-700 transition-all text-slate-800 dark:text-slate-100"
                                                         >
                                                             Next
                                                         </button>
@@ -1644,7 +1698,7 @@ const BusinessHome = () => {
                                     <div className="glass p-10 rounded-2xl border-primary-500/30 w-full max-w-4xl relative z-10 animate-scale-in max-h-[90vh] overflow-y-auto no-scrollbar">
                                         <div className="flex justify-between items-center mb-8">
                                             <h2 className="text-3xl font-serif text-slate-900 dark:text-white">Revise Transaction</h2>
-                                            <button onClick={() => setIsEditingTransaction(false)} className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+                                            <button onClick={() => setIsEditingTransaction(false)} className="text-slate-900 dark:text-white hover:text-slate-900 dark:hover:text-white transition-colors">
                                                 <Plus className="w-8 h-8 rotate-45" />
                                             </button>
                                         </div>
@@ -1801,7 +1855,7 @@ const BusinessHome = () => {
                                                 <button type="submit" className="flex-grow bg-primary-500 text-white py-5 rounded-2xl text-lg uppercase tracking-[0.2em] shadow-xl shadow-primary-500/20 font-black hover:bg-primary-600 transition-all active:scale-95">
                                                     Update Financial Record
                                                 </button>
-                                                <button type="button" onClick={() => setIsEditingTransaction(false)} className="bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 px-10 py-5 rounded-2xl text-lg uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
+                                                <button type="button" onClick={() => setIsEditingTransaction(false)} className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-10 py-5 rounded-2xl text-lg uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
                                                     Cancel
                                                 </button>
                                             </div>
@@ -1816,16 +1870,16 @@ const BusinessHome = () => {
                     )}
 
                     {activeTab === 'Staff' && (
-                        <div className="space-y-6">
+                        <div className="glass p-10 space-y-6">
                             <div className="flex justify-between items-center mb-6">
                                 <div>
-                                    <h2 className="text-3xl font-serif text-slate-900 dark:text-white">Business Team</h2>
-                                    <p className="text-slate-500 dark:text-slate-400">Manage access and roles for your organization</p>
+                                    <h2 className="text-2xl md:text-3xl font-serif font-black tracking-tight text-slate-800 dark:text-slate-100">Team Management</h2>
+                                    <p className="text-slate-800 dark:text-slate-100 font-bold opacity-70">Manage access and roles for your organization</p>
                                 </div>
                                 {role === 'Owner' && (
                                     <button
                                         onClick={() => setIsInviting(true)}
-                                        className="bg-primary-500 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-primary-600 transition-all flex items-center space-x-2"
+                                        className="bg-primary-500 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-primary-600 transition-all flex items-center space-x-2 shadow-xl shadow-primary-500/20"
                                     >
                                         <Plus className="w-4 h-4" />
                                         <span>Add Member</span>
@@ -1834,14 +1888,14 @@ const BusinessHome = () => {
                             </div>
 
                             {isLoadingMembers ? (
-                                <div className="p-12 text-center glass rounded-3xl">
+                                <div className="p-12 text-center rounded-3xl bg-slate-50/50 dark:bg-slate-800/20">
                                     <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                    <p className="text-slate-500">Loading team...</p>
+                                    <p className="text-slate-800 dark:text-slate-100 font-bold">Loading team...</p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {members.map((member) => (
-                                        <div key={member.user_id} className="glass p-8 rounded-[2.5rem] border-slate-200 dark:border-white/5 group hover:border-primary-500/30 transition-all relative overflow-hidden">
+                                        <div key={member.user_id} className="p-8 rounded-[2.5rem] border border-slate-200 dark:border-white/10 group hover:border-primary-500/30 transition-all relative overflow-hidden bg-slate-50/50 dark:bg-white/5">
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 blur-3xl -mr-16 -mt-16"></div>
 
                                             <div className="flex items-center space-x-4 mb-6 relative z-10">
@@ -1849,14 +1903,14 @@ const BusinessHome = () => {
                                                     {member.name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-serif text-xl text-slate-900 dark:text-white">{member.name}</h3>
-                                                    <p className="text-slate-500 text-xs truncate max-w-[150px]">{member.email}</p>
+                                                    <h3 className="font-serif text-xl text-slate-800 dark:text-slate-100 font-black">{member.name}</h3>
+                                                    <p className="text-slate-800 dark:text-slate-100 text-xs truncate max-w-[150px] font-semibold opacity-70">{member.email}</p>
                                                 </div>
                                             </div>
 
                                             <div className="flex flex-col space-y-4 relative z-10">
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Current Role</span>
+                                                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-800 dark:text-slate-100 opacity-60">Current Role</span>
                                                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${member.role === 'Owner' ? 'bg-primary-500/20 text-primary-500' :
                                                         member.role === 'Accountant' ? 'bg-blue-500/20 text-blue-500' :
                                                             'bg-slate-500/20 text-slate-500'
@@ -1865,8 +1919,8 @@ const BusinessHome = () => {
                                                     </span>
                                                 </div>
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Joined</span>
-                                                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{member.joined_at}</span>
+                                                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-800 dark:text-slate-100 opacity-60">Joined</span>
+                                                    <span className="text-xs font-black text-slate-800 dark:text-slate-100">{member.joined_at}</span>
                                                 </div>
                                             </div>
 
@@ -1878,7 +1932,7 @@ const BusinessHome = () => {
                                                             setInviteRole(member.role);
                                                             setIsEditingRole(true);
                                                         }}
-                                                        className="flex-grow bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all"
+                                                        className="flex-grow bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-100 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
                                                     >
                                                         Edit Role
                                                     </button>
@@ -1894,9 +1948,9 @@ const BusinessHome = () => {
                                     ))}
 
                                     {members.length === 0 && (
-                                        <div className="col-span-full p-20 text-center glass rounded-[3rem] border-dashed border-slate-300 dark:border-white/10">
+                                        <div className="col-span-full p-20 text-center rounded-[3rem] border-2 border-dashed border-slate-300 dark:border-white/10">
                                             <Users className="w-16 h-16 text-slate-300 mx-auto mb-4 opacity-20" />
-                                            <p className="text-slate-500 font-serif text-xl italic">No team members found</p>
+                                            <p className="text-slate-800 dark:text-slate-100 font-serif text-xl italic font-black">No team members found</p>
                                         </div>
                                     )}
                                 </div>

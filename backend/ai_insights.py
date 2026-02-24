@@ -237,6 +237,33 @@ def get_dashboard_stats(business_id):
             "color": "red"
         })
 
+    # Strategic Suggestions
+    high_velocity_items = sorted([p for p in products if (db.session.query(func.sum(Transaction.quantity)).filter(Transaction.inventory_item_id == p.id, Transaction.type == "Sale", Transaction.timestamp >= (today - timedelta(days=7))).scalar() or 0) > 10], key=lambda x: x.stock_quantity)
+    if high_velocity_items:
+        alerts.append({
+            "level": "Strategy",
+            "title": "Boost High-Velocity Sales",
+            "message": f"'{high_velocity_items[0].name}' is moving fast. Consider a 'Buy 2 Get 5% Off' bundle to clear stock even faster and increase average order value.",
+            "color": "indigo"
+        })
+
+    low_margin_high_vol = [p for p in products if (p.selling_price - p.cost_price) / (p.selling_price or 1) < 0.15]
+    if low_margin_high_vol:
+        alerts.append({
+            "level": "Strategy",
+            "title": "Profit Optimizer",
+            "message": f"Items like '{low_margin_high_vol[0].name}' have low margins but high interest. Bundle them with high-margin 'Accessories' or 'Add-ons' to boost overall profitability.",
+            "color": "emerald"
+        })
+
+    if net_profit > 0 and recent_sales > last_month_sales:
+        alerts.append({
+            "level": "Growth",
+            "title": "Scaling Opportunity",
+            "message": "Sales are trending up! This is a great time to introduce a loyalty program to lock in new customers.",
+            "color": "amber"
+        })
+
     # 6. PERIOD ANALYSIS (For Chart)
     period_analysis = []
     expense_series = [] # For expense forecasting
@@ -384,8 +411,19 @@ def get_dashboard_stats(business_id):
                     Product.name,
                     func.sum(Transaction.profit)
                 ).join(Transaction, Transaction.inventory_item_id == Product.id).filter(
-                    Product.business_id == business_id, Transaction.type == "Sale"
+                    Product.business_id == business_id, Transaction.type == "Sale",
+                    Transaction.timestamp >= start_date
                 ).group_by(Product.id).order_by(func.sum(Transaction.profit).desc()).limit(5).all()
+            ],
+            "top_selling": [
+                {"name": n, "total_qty": int(tq)}
+                for n, tq in db.session.query(
+                    Product.name,
+                    func.sum(Transaction.quantity)
+                ).join(Transaction, Transaction.inventory_item_id == Product.id).filter(
+                    Product.business_id == business_id, Transaction.type == "Sale",
+                    Transaction.timestamp >= start_date
+                ).group_by(Product.id).order_by(func.sum(Transaction.quantity).desc()).limit(5).all()
             ],
             "low_stock": [
                 {"name": n, "stock": s}
