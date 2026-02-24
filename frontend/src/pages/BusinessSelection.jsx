@@ -140,7 +140,11 @@ const BusinessSelection = () => {
                                     )}
                                     {biz.role === 'Owner' && (
                                         <button
-                                            onClick={() => deleteBusiness(biz.id)}
+                                            onClick={() => {
+                                                if (window.confirm('Are you sure you want to terminate this entity? This action is permanent and all data will be lost.')) {
+                                                    deleteBusiness(biz.id);
+                                                }
+                                            }}
                                             className="p-5 rounded-3xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 dark:hover:bg-red-500/20 transition-all border border-slate-200 dark:border-white/10 shadow-lg hover:rotate-3"
                                         >
                                             <Trash2 className="w-6 h-6" />
@@ -205,7 +209,7 @@ const BusinessSelection = () => {
                             </div>
                         ) : (
                             <button
-                                onClick={() => navigate('/create-business')}
+                                onClick={() => setIsCreating(true)}
                                 className="p-8 glass flex flex-col items-center justify-center gap-4 hover:border-primary-500/50 hover:bg-primary-500/5 transition-all duration-300 min-h-[320px] w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] max-w-sm shadow-lg hover:scale-[1.02]"
                             >
                                 <div className="p-7 rounded-[1.5rem] bg-white/5 mb-6 group-hover:bg-primary-500/10 transition-all border border-dashed border-white/20 shadow-inner">

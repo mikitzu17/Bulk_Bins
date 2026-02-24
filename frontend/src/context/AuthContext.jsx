@@ -175,9 +175,28 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const deleteBusiness = (id) => {
-        // Implementation for backend delete will go here
-        toast.error('Delete functionality under migration.');
+    const deleteBusiness = async (id) => {
+        try {
+            const response = await fetch(`${API_URL}/businesses/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                setBusinesses(businesses.filter(b => b.id !== id));
+                toast.success('Entity terminated successfully');
+                return true;
+            } else {
+                const data = await response.json();
+                toast.error(data.message || 'Failed to delete business');
+                return false;
+            }
+        } catch (error) {
+            toast.error('Deletion failed. Please try again.');
+            return false;
+        }
     };
 
     return (
