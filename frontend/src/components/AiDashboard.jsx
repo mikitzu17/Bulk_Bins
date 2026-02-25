@@ -628,13 +628,13 @@ function Dashboard({ businessId: propBusinessId, theme }) {
                         </div>
 
                         <div className="h-[240px]">
-                            {stats.monthly_profit_trend?.labels?.length > 0 ? (
+                            {stats.monthly_profit_trend?.length > 0 ? (
                                 <Line
                                     data={{
-                                        labels: stats.monthly_profit_trend.labels,
+                                        labels: stats.monthly_profit_trend.map(m => m.month),
                                         datasets: [{
                                             label: 'Net Profit',
-                                            data: stats.monthly_profit_trend.profit,
+                                            data: stats.monthly_profit_trend.map(m => m.profit),
                                             borderColor: '#10b981',
                                             backgroundColor: 'rgba(16, 185, 129, 0.1)',
                                             fill: true,
